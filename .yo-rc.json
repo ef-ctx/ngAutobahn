@@ -1,0 +1,28 @@
+{
+  "generator-nglib": {
+    "github.username": "ef-ctx",
+    "license.name": "MIT",
+    "license.url": "https://raw.githubusercontent.com/EFEducationFirstMobile/oss/master/LICENSE",
+    "author.name": "EF CTX",
+    "author.email": "ctx@ef.com",
+    "author.url": "http://efclass.io",
+    "has.sass": false,
+    "use.travis": true,
+    "project.name": "ngAutobahn",
+    "project.description": "angular modules for autobahn real time services over WAMP web socket protocol ",
+    "bower.id": "ngAutobahn",
+    "npm.id": "ngAutobahn",
+    "angular.module": "ngAutobahn",
+    "has.tpl": false,
+    "has.css": false,
+    "has.less": false,
+    "has.docs": true,
+    "use.git": true,
+    "github.reponame": "ngAutobahn",
+    "homepage.url": "https://github.com/ef-ctx/ngAutobahn",
+    "docs.url": "https://github.com/ef-ctx/ngAutobahn",
+    "bugs.url": "https://github.com/ef-ctx/ngAutobahn/issues",
+    "travis.id": "ef-ctx/ngAutobahn",
+    "repo.url": "git@github.com:ef-ctx/ngAutobahn.git"
+  }
+}

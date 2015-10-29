@@ -1,0 +1,15 @@
+@ngdoc overview
+@name API Reference
+@description
+
+# ngAutobahn API Reference
+
+> Welcome to the **ngAutobahn** API reference.
+
+If you want to know how **ngAutobahn** works, checkout the {@link guide/ guide} and the {@link demos/ demos}.
+
+
+## Modules
+
+- **[ngAutobahn](#/api/ngAutobahn)** - Provides a configurable service that divides numbers by X, as well as a directive and a filter.
+
