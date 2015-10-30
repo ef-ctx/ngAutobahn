@@ -22,6 +22,7 @@
      * provides a facade for publish and subcscribe methods
      *
      *****************************************************************************/
+
     .factory('NgAutobahnMessageBroker', [
         '$rootScope',
         function ($rootScope) {
@@ -44,6 +45,7 @@
                 /****************************************************************
                  * METHODS
                  ***************************************************************/
+
                 function subscribe(message, handler) {
                     if (!_messageHandlers[message]) {
                         _messageHandlers[message] = [];
@@ -63,6 +65,7 @@
                 /****************************************************************
                  * HANDLERS
                  ***************************************************************/
+
                 function messageReceivedHandler(payloadArray, payload) {
                     var channelName = payload.channel,
                         messageName = payload.type,

@@ -9,6 +9,7 @@
      * @description module for ping util
      *
      *****************************************************************************/
+
     angular.module('ngAutobahn.utils.ping', [])
 
     /*****************************************************************************
@@ -21,9 +22,9 @@
      * invokes an async function provided repeatedly in a configured interval and
      * if it does not resolve in a configured period of time ivokes the errorFn provided.
      *
-     *
      *****************************************************************************/
-    .provider('ping', [
+
+    .provider('Ping', [
         function () {
 
             var config = {

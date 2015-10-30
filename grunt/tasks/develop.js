@@ -3,7 +3,7 @@ module.exports = function (grunt) {
 
     grunt.groups.registerTask('develop', [
         'build',
-        'docs',
+        //'docs',
         'serve:build',
         'watch'
     ]);

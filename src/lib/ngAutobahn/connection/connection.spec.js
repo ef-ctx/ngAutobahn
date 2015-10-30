@@ -26,15 +26,15 @@ describe('ngAutobahn.connection', function () {
             socketConnection,
             $timeout,
             $interval,
-            CX_SOCKET_CONNECTION_EVENTS;
+            NG_AUTOBAHN_CONNECTION_EVENTS;
 
-        beforeEach(inject(function (_$q_, _$rootScope_, _ngAutobahnConnection_, _$interval_, _$timeout_, _CX_SOCKET_CONNECTION_EVENTS_) {
+        beforeEach(inject(function (_$q_, _$rootScope_, _ngAutobahnConnection_, _$interval_, _$timeout_, _NG_AUTOBAHN_CONNECTION_EVENTS_) {
             $q = _$q_;
             $rootScope = _$rootScope_;
-            socketConnection =  _ngAutobahnConnection_;
+            socketConnection = _ngAutobahnConnection_;
             $interval = _$interval_;
             $timeout = _$timeout_;
-            CX_SOCKET_CONNECTION_EVENTS = _CX_SOCKET_CONNECTION_EVENTS_;
+            NG_AUTOBAHN_CONNECTION_EVENTS = _NG_AUTOBAHN_CONNECTION_EVENTS_;
         }));
 
         beforeEach(function () {
@@ -138,7 +138,7 @@ describe('ngAutobahn.connection', function () {
                 };
                 spyOn(foo, 'bar');
 
-                $rootScope.$on(CX_SOCKET_CONNECTION_EVENTS.OPEN, foo.bar);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, foo.bar);
                 socketConnection.openConnection();
                 $timeout.flush();
                 expect(foo.bar).toHaveBeenCalled();
@@ -213,7 +213,7 @@ describe('ngAutobahn.connection', function () {
                 };
                 spyOn(foo, 'bar');
 
-                $rootScope.$on(CX_SOCKET_CONNECTION_EVENTS.CLOSE, foo.bar);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, foo.bar);
                 socketConnection.openConnection();
                 $timeout.flush();
                 socketConnection.closeConnection();

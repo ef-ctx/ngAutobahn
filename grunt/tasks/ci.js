@@ -3,7 +3,7 @@ module.exports = function (grunt) {
 
     grunt.groups.registerTask('ci', [
         'build',
-        'docs',
+        //'docs',
         'dist',
     ]);
 };

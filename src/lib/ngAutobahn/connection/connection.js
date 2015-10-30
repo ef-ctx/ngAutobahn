@@ -40,8 +40,8 @@
      *****************************************************************************/
 
     .provider('ngAutobahnConnection', [
-        'pingProvider',
-        function ngAutobahnConnectionProvider(pingProvider) {
+        'PingProvider',
+        function ngAutobahnConnectionProvider(PingProvider) {
             /**
              * @type {Object} provider configuration used in service/factory below
              */
@@ -88,7 +88,7 @@
                     retry_delay_jitter: serviceConfig.retries.delayJitter
                 };
 
-                pingProvider.configure({
+                PingProvider.configure({
                     delay: serviceConfig.ping.delay,
                     maxResponseDelay: serviceConfig.ping.timeout
                 });
@@ -97,16 +97,17 @@
             this.$get = [
                 '$q',
                 '$rootScope',
-                'ping',
+                'Ping',
                 'NG_AUTOBAHN_CONNECTION_EVENTS',
-                function ($q, $rootScope, ping, NG_AUTOBAHN_CONNECTION_EVENTS) {
+                function ($q, $rootScope, Ping, NG_AUTOBAHN_CONNECTION_EVENTS) {
+
                     return new CxSocketConnection();
 
                     function CxSocketConnection() {
                         var self = this,
                             _session,
                             _connection,
-                            _ping = new ping(pingFn, reconnect);
+                            _ping = new Ping(pingFn, reconnect);
 
                         self.openConnection = openConnection;
                         self.closeConnection = closeConnection;
@@ -114,6 +115,7 @@
                         /****************************************************************
                          * OPEN
                          ***************************************************************/
+
                         function openConnection() {
                             var defer = $q.defer();
 
@@ -144,14 +146,11 @@
                         /****************************************************************
                          * CLOSE
                          ***************************************************************/
+
                         function closeConnection() {
                             return _closeConnection()
                                 .then(notifyConnectionIsClosed);
                         }
-
-                        /****************************************************************
-                         * HELPERS
-                         ***************************************************************/
 
                         function _closeConnection() {
                             var defer = $q.defer();
@@ -169,6 +168,10 @@
 
                             return defer.promise;
                         }
+
+                        /****************************************************************
+                         * HELPERS
+                         ***************************************************************/
 
                         function reconnect() {
                             notifyConnectionIsLost();

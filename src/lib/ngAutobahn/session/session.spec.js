@@ -1,5 +1,5 @@
 describe('cxSocketSession', function () {
-    'use strict';
+    /*'use strict';
 
     var $q,
         $timeout,
@@ -433,7 +433,7 @@ describe('cxSocketSession', function () {
         });
 
         it('should clean all handlers so that it is clean when subscribing to a new session', inject(function (cxSocketSession) {
-            /*var _broker1,
+            [>var _broker1,
                 _broker2,
                 _channel1 = 'foo',
                 _channel2 = 'bar';
@@ -471,7 +471,7 @@ describe('cxSocketSession', function () {
 
             expect(handlers.messageReceived).toHaveBeenCalled();
             expect(_broker1.messageReceivedHandler).not.toHaveBeenCalled();
-            expect(_broker2.messageReceivedHandler).not.toHaveBeenCalled();*/
+            expect(_broker2.messageReceivedHandler).not.toHaveBeenCalled();<]
         }));
 
         it('should unsubscribe all autobahn subscriptions from autobahn session', inject(function (cxSocketSession) {
@@ -500,5 +500,5 @@ describe('cxSocketSession', function () {
 
         }));
 
-    });
+    });*/
 });
