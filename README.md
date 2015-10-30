@@ -23,12 +23,6 @@ Via npm:
 $ npm install --save ngAutobahn
 ```
 
-
-Include the following JS/CSS/assets in your build.
--
--
--
-
 Checkout the [full documentation](https://github.com/ef-ctx/ngAutobahn).
 
 
