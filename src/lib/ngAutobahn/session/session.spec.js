@@ -1,4 +1,4 @@
-describe('cxSocketSession', function() {
+describe('cxSocketSession', function () {
     'use strict';
 
     var $q,
@@ -8,29 +8,29 @@ describe('cxSocketSession', function() {
         channelHandlers = {},
         autobahn = {
             session: {
-                subscribe: function(channel, fn) {
+                subscribe: function (channel, fn) {
                     var defer = $q.defer();
                     subscribeToChannel(channel, fn);
                     defer.resolve({});
                     return defer.promise;
                 },
-                call: function() {
+                call: function () {
                     var defer = $q.defer();
                     defer.resolve();
                     return defer.promise;
                 },
-                publish: function() {
+                publish: function () {
                     var defer = $q.defer();
                     defer.resolve();
                     return defer.promise;
                 },
-                unsubscribe: function() {}
+                unsubscribe: function () {}
             }
         },
         handlers = {
-            success: function() {},
-            error: function() {},
-            messageReceived: function() {}
+            success: function () {},
+            error: function () {},
+            messageReceived: function () {}
         },
         connectionEvents = {
             OPEN: 'open',
@@ -70,27 +70,27 @@ describe('cxSocketSession', function() {
     }
 
     function Broker(channel, _publish) {
-        this.messageReceivedHandler = function(p, payload) {
+        this.messageReceivedHandler = function (p, payload) {
             handlers.messageReceived(payload.channel, payload.type, payload.data);
         };
         this.facade = {
             channel: channel,
             publish: _publish,
-            subscribe: function() {}
+            subscribe: function () {}
         };
     }
 
     beforeEach(module('cxSocketSession'));
 
-    beforeEach(function() {
-        module(function($provide) {
+    beforeEach(function () {
+        module(function ($provide) {
             $provide.constant('CX_SOCKET_CONNECTION_EVENTS', connectionEvents);
             $provide.value('cxSocketConnection', cxSocketConnection);
             $provide.value('CxSocketMessageBroker', Broker);
         });
     });
 
-    beforeEach(inject(function(_$q_, _$timeout_, _$rootScope_) {
+    beforeEach(inject(function (_$q_, _$timeout_, _$rootScope_) {
         $q = _$q_;
         $timeout = _$timeout_;
         $rootScope = _$rootScope_;
@@ -102,10 +102,10 @@ describe('cxSocketSession', function() {
     beforeEach(function setSessionAndConnection() {
         autobahn.session2 = angular.copy(autobahn.session);
 
-        cxSocketConnection.openConnection = function() {
+        cxSocketConnection.openConnection = function () {
             var defer = $q.defer();
 
-            $timeout(function() {
+            $timeout(function () {
                 if (isConnected) {
                     defer.resolve(autobahn.session);
                     notifyConnectionIsOpened(autobahn.session);
@@ -118,10 +118,10 @@ describe('cxSocketSession', function() {
             return defer.promise;
         };
 
-        cxSocketConnection.closeConnection = function() {
+        cxSocketConnection.closeConnection = function () {
             var defer = $q.defer();
 
-            $timeout(function() {
+            $timeout(function () {
                 channelHandlers = {};
                 defer.resolve();
                 notifyConnectionIsClosed();
@@ -130,11 +130,11 @@ describe('cxSocketSession', function() {
             return defer.promise;
         };
 
-        cxSocketConnection.closeAndRestablishConnection = function() {
-            $timeout(function() {
+        cxSocketConnection.closeAndRestablishConnection = function () {
+            $timeout(function () {
                 channelHandlers = {};
                 notifyConnectionIsClosed();
-                $timeout(function() {
+                $timeout(function () {
                     notifyConnectionIsOpened(autobahn.session);
                 });
             });
@@ -157,15 +157,15 @@ describe('cxSocketSession', function() {
         spyOn(handlers, 'messageReceived').and.callThrough();
     });
 
-    describe('subscribe', function() {
-        it('SHOULD be a function', inject(function(cxSocketSession) {
+    describe('subscribe', function () {
+        it('SHOULD be a function', inject(function (cxSocketSession) {
             expect(typeof cxSocketSession.subscribe).toBe('function');
         }));
 
-        describe('WHEN subscribing', function() {
+        describe('WHEN subscribing', function () {
 
-            describe('AND no channel is provided', function() {
-                it('SHOULD throw an error', inject(function(cxSocketSession) {
+            describe('AND no channel is provided', function () {
+                it('SHOULD throw an error', inject(function (cxSocketSession) {
                     function foo() {
                         cxSocketSession.subscribe();
                     }
@@ -173,21 +173,21 @@ describe('cxSocketSession', function() {
                 }));
             });
 
-            describe('AND channel is provided', function() {
-                it('SHOULD return a promise', inject(function(cxSocketSession) {
+            describe('AND channel is provided', function () {
+                it('SHOULD return a promise', inject(function (cxSocketSession) {
                     expect(typeof cxSocketSession.subscribe('foo').then).toBe('function');
                 }));
 
-                it('SHOULD invoke cxSocketConnection.openConnection', inject(function(cxSocketSession) {
+                it('SHOULD invoke cxSocketConnection.openConnection', inject(function (cxSocketSession) {
                     cxSocketSession.subscribe('foo', null);
                     expect(cxSocketConnection.openConnection).toHaveBeenCalled();
                 }));
 
-                describe('AND the connection is established', function() {
-                    it('SHOULD resolve the promise with a broker with the channel name asigned', inject(function(cxSocketSession) {
+                describe('AND the connection is established', function () {
+                    it('SHOULD resolve the promise with a broker with the channel name asigned', inject(function (cxSocketSession) {
                         var _broker,
                             _channel = 'foo';
-                        cxSocketSession.subscribe(_channel).then(function(broker) {
+                        cxSocketSession.subscribe(_channel).then(function (broker) {
                             _broker = broker;
                         });
                         $timeout.flush();
@@ -198,11 +198,11 @@ describe('cxSocketSession', function() {
                     }));
                 });
 
-                describe('AND the connection could NOT be established', function() {
-                    it('SHOULD also return the broker', inject(function(cxSocketSession) {
+                describe('AND the connection could NOT be established', function () {
+                    it('SHOULD also return the broker', inject(function (cxSocketSession) {
                         var _broker,
                             _channel = 'foo';
-                        cxSocketSession.subscribe(_channel).then(function(broker) {
+                        cxSocketSession.subscribe(_channel).then(function (broker) {
                             _broker = broker;
                         });
                         isConnected = true;
@@ -217,12 +217,12 @@ describe('cxSocketSession', function() {
             });
         });
 
-        describe('publish method given to broker to give an encapsulated way of publish messages through the session', function() {
+        describe('publish method given to broker to give an encapsulated way of publish messages through the session', function () {
             var _broker,
                 _channel = 'foo';
 
-            beforeEach(inject(function(cxSocketSession) {
-                cxSocketSession.subscribe(_channel).then(function(broker) {
+            beforeEach(inject(function (cxSocketSession) {
+                cxSocketSession.subscribe(_channel).then(function (broker) {
                     _broker = broker;
                 });
                 $timeout.flush();
@@ -230,15 +230,15 @@ describe('cxSocketSession', function() {
 
             }));
 
-            it('should be a function ', inject(function(cxSocketSession) {
+            it('should be a function ', inject(function (cxSocketSession) {
                 expect(typeof _broker.publish).toBe('function');
             }));
 
-            it('should return a promise', inject(function() {
+            it('should return a promise', inject(function () {
                 expect(typeof _broker.publish(_channel, 'bar').then).toBe('function');
             }));
 
-            it('should call autobahn.session.call', inject(function() {
+            it('should call autobahn.session.call', inject(function () {
                 _broker.publish(_channel, 'bar')
                     .then(handlers.success, handlers.error);
                 $timeout.flush();
@@ -246,16 +246,16 @@ describe('cxSocketSession', function() {
                 expect(autobahn.session.publish).toHaveBeenCalled();
             }));
 
-            describe('when there is connection', function() {
-                it('should resolve the promise ', inject(function() {
+            describe('when there is connection', function () {
+                it('should resolve the promise ', inject(function () {
                     _broker.publish(_channel, 'bar')
                         .then(handlers.success, handlers.error);
                     $timeout.flush();
                     expect(handlers.success).toHaveBeenCalled();
                 }));
             });
-            describe('when there is NO connection', function() {
-                it('should reject the promise ', inject(function() {
+            describe('when there is NO connection', function () {
+                it('should reject the promise ', inject(function () {
                     cxSocketConnection.closeConnection();
                     $timeout.flush();
                     _broker.publish(_channel, 'bar')
@@ -265,20 +265,20 @@ describe('cxSocketSession', function() {
                 }));
             });
         });
-        describe('ONCE subscribed', function() {
-            describe('WHEN receiving a message', function() {
-                it('SHOULD invoke the brokers MESSAGE handler assigned to the channel', inject(function(cxSocketSession) {
+        describe('ONCE subscribed', function () {
+            describe('WHEN receiving a message', function () {
+                it('SHOULD invoke the brokers MESSAGE handler assigned to the channel', inject(function (cxSocketSession) {
                     var _broker1,
                         _broker2,
                         _channel1 = 'foo',
                         _channel2 = 'bar';
 
-                    cxSocketSession.subscribe(_channel1).then(function(broker) {
+                    cxSocketSession.subscribe(_channel1).then(function (broker) {
                         _broker1 = broker;
                     });
 
                     $timeout.flush();
-                    cxSocketSession.subscribe(_channel2).then(function(broker) {
+                    cxSocketSession.subscribe(_channel2).then(function (broker) {
                         _broker2 = broker;
                     });
 
@@ -294,20 +294,20 @@ describe('cxSocketSession', function() {
                 }));
             });
 
-            describe('IF the connection is lost and regained again', function() {
-                describe('WHEN receiving a message', function() {
-                    it('SHOULD invoke the same brokers message handlers that was asigned at the beginning', inject(function(cxSocketSession) {
+            describe('IF the connection is lost and regained again', function () {
+                describe('WHEN receiving a message', function () {
+                    it('SHOULD invoke the same brokers message handlers that was asigned at the beginning', inject(function (cxSocketSession) {
                         var _broker1,
                             _broker2,
                             _channel1 = 'foo',
                             _channel2 = 'bar';
 
-                        cxSocketSession.subscribe(_channel1).then(function(broker) {
+                        cxSocketSession.subscribe(_channel1).then(function (broker) {
                             _broker1 = broker;
                         });
                         $timeout.flush();
 
-                        cxSocketSession.subscribe(_channel2).then(function(broker) {
+                        cxSocketSession.subscribe(_channel2).then(function (broker) {
                             _broker2 = broker;
                         });
                         $timeout.flush();
@@ -329,14 +329,14 @@ describe('cxSocketSession', function() {
                     }));
                 });
 
-                describe('WHEN subscribing while theres no connection', function() {
-                    it('SHOULD store the handlers and subscribe them when reconnecting', inject(function(cxSocketSession) {
+                describe('WHEN subscribing while theres no connection', function () {
+                    it('SHOULD store the handlers and subscribe them when reconnecting', inject(function (cxSocketSession) {
                         var _broker1,
                             _broker2,
                             _channel1 = 'foo',
                             _channel2 = 'bar';
 
-                        cxSocketSession.subscribe(_channel1).then(function(broker) {
+                        cxSocketSession.subscribe(_channel1).then(function (broker) {
                             _broker1 = broker;
                         });
                         $timeout.flush();
@@ -348,7 +348,7 @@ describe('cxSocketSession', function() {
                         cxSocketConnection.closeConnection();
                         isConnected = false;
 
-                        cxSocketSession.subscribe(_channel2).then(function(broker) {
+                        cxSocketSession.subscribe(_channel2).then(function (broker) {
                             _broker2 = broker;
                         });
                         $timeout.flush();
@@ -366,18 +366,18 @@ describe('cxSocketSession', function() {
         });
     });
 
-    describe('remoteCall', function() {
-        it('SHOULD be a function', inject(function(cxSocketSession) {
+    describe('remoteCall', function () {
+        it('SHOULD be a function', inject(function (cxSocketSession) {
             expect(typeof cxSocketSession.remoteCall).toBe('function');
         }));
 
-        it('SHOULD return a promise', inject(function(cxSocketSession) {
+        it('SHOULD return a promise', inject(function (cxSocketSession) {
             expect(typeof cxSocketSession.remoteCall().then).toBe('function');
         }));
 
-        describe('WHEN the connection has been established', function() {
+        describe('WHEN the connection has been established', function () {
 
-            it('SHOULD invoke autobahn session call with a method name and a payload', inject(function(cxSocketSession) {
+            it('SHOULD invoke autobahn session call with a method name and a payload', inject(function (cxSocketSession) {
                 var methodName = 'foo',
                     payload = {
                         bar: 'baz'
@@ -388,7 +388,7 @@ describe('cxSocketSession', function() {
                 expect(autobahn.session.call).toHaveBeenCalledWith(methodName, [], payload);
             }));
 
-            it('SHOULD NOT invoke CxSocketConnection.open() ', inject(function(cxSocketSession) {
+            it('SHOULD NOT invoke CxSocketConnection.open() ', inject(function (cxSocketSession) {
                 cxSocketConnection.openConnection();
                 $timeout.flush();
 
@@ -400,8 +400,8 @@ describe('cxSocketSession', function() {
 
         });
 
-        describe('WHEN the connection has NOT been established', function() {
-            it('SHOULD invoke CxSocketConnection.open() ', inject(function(cxSocketSession) {
+        describe('WHEN the connection has NOT been established', function () {
+            it('SHOULD invoke CxSocketConnection.open() ', inject(function (cxSocketSession) {
                 cxSocketSession.remoteCall('foo', {
                     bar: 'baz'
                 });
@@ -410,18 +410,18 @@ describe('cxSocketSession', function() {
         });
     });
 
-    describe('destroy', function() {
-        it('should be a function', inject(function(cxSocketSession) {
+    describe('destroy', function () {
+        it('should be a function', inject(function (cxSocketSession) {
             expect(typeof cxSocketSession.destroy).toBe('function');
         }));
 
-        describe('promise', function() {
-            it('should return a promise', inject(function(cxSocketSession) {
+        describe('promise', function () {
+            it('should return a promise', inject(function (cxSocketSession) {
                 var promise = cxSocketSession.destroy();
                 expect(typeof promise.then).toBe('function');
             }));
 
-            it('should resolve when cxSocketConnection is closed', inject(function(cxSocketSession) {
+            it('should resolve when cxSocketConnection is closed', inject(function (cxSocketSession) {
                 cxSocketConnection.openConnection();
                 $timeout.flush();
 
@@ -432,7 +432,7 @@ describe('cxSocketSession', function() {
             }));
         });
 
-        it('should clean all handlers so that it is clean when subscribing to a new session', inject(function(cxSocketSession) {
+        it('should clean all handlers so that it is clean when subscribing to a new session', inject(function (cxSocketSession) {
             /*var _broker1,
                 _broker2,
                 _channel1 = 'foo',
@@ -474,11 +474,11 @@ describe('cxSocketSession', function() {
             expect(_broker2.messageReceivedHandler).not.toHaveBeenCalled();*/
         }));
 
-        it('should unsubscribe all autobahn subscriptions from autobahn session', inject(function(cxSocketSession) {
+        it('should unsubscribe all autobahn subscriptions from autobahn session', inject(function (cxSocketSession) {
             var _broker1,
                 _channel1 = 'foo';
 
-            cxSocketSession.subscribe(_channel1).then(function(broker) {
+            cxSocketSession.subscribe(_channel1).then(function (broker) {
                 _broker1 = broker;
             });
             $timeout.flush();
@@ -489,14 +489,14 @@ describe('cxSocketSession', function() {
             expect(autobahn.session.unsubscribe).toHaveBeenCalled();
         }));
 
-        it('should invoke cxSocketConnection.close', inject(function(cxSocketSession) {
+        it('should invoke cxSocketConnection.close', inject(function (cxSocketSession) {
             cxSocketSession.subscribe('foo');
             cxSocketSession.destroy();
             $timeout.flush();
             expect(cxSocketConnection.closeConnection).toHaveBeenCalled();
         }));
 
-        it('should invoke destroy on all brokers', inject(function(cxSocketSession) {
+        it('should invoke destroy on all brokers', inject(function (cxSocketSession) {
 
         }));
 

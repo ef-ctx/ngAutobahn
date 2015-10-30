@@ -61,7 +61,7 @@
                          * @returns {boolean} Some result.
                          */
                         someMethod: function (value) {
-                          return true;
+                            return true;
                         }
                     };
 

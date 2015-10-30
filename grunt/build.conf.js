@@ -168,11 +168,11 @@ module.exports = function (grunt, data) {
                 examplesScripts: [
                     'vendor/angular/angular.js',
                     'src/lib/<%= vars.ngNamespace %>/<%= vars.ngNamespace %>.js',
-                    
+
                 ],
                 examplesStyles: [
                     '//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.css',
-                    
+
                 ],
 
                 // the version selector expects JSON with the existing version and their URLs
@@ -305,4 +305,3 @@ module.exports = function (grunt, data) {
 
     return config;
 };
-

@@ -6,4 +6,3 @@ module.exports = function (grunt) {
     grunt.task.registerTask('devserver', ['serve:build:keepalive']);
 
 };
-

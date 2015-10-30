@@ -66,7 +66,7 @@ angular.module('ngAutobahn.messageBroker', [])
                     messagePayload = payload.data;
 
                 if (hasHandlerForMessage(channelName, messageName)) {
-                    $rootScope.$applyAsync(function() {
+                    $rootScope.$applyAsync(function () {
                         callHandlers(messageName, messagePayload);
                     });
                 }

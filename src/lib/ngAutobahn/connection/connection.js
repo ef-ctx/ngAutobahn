@@ -23,7 +23,7 @@ angular.module('ngAutobahn.connection', [])
  *
  *****************************************************************************/
 .provider('ping', [
-    function() {
+    function () {
         'use strict';
 
         var config = {
@@ -31,14 +31,14 @@ angular.module('ngAutobahn.connection', [])
             maxResponseDelay: 3000
         };
 
-        this.configure = function(configuration) {
+        this.configure = function (configuration) {
             angular.extend(config, configuration);
         };
 
         this.$get = [
             '$timeout',
             '$interval',
-            function($timeout, $interval) {
+            function ($timeout, $interval) {
                 return Ping;
 
                 function Ping(pingFn, errorFn) {
@@ -146,7 +146,7 @@ angular.module('ngAutobahn.connection', [])
          * - url: the comms websocket location
          * - realm: the comms realm
          */
-        this.configure = function(config) {
+        this.configure = function (config) {
             angular.extend(serviceConfig, config);
 
             autobahnOptions = {
@@ -170,7 +170,7 @@ angular.module('ngAutobahn.connection', [])
             '$rootScope',
             'ping',
             'NG_AUTOBAHN_CONNECTION_EVENTS',
-            function($q, $rootScope, ping, NG_AUTOBAHN_CONNECTION_EVENTS) {
+            function ($q, $rootScope, ping, NG_AUTOBAHN_CONNECTION_EVENTS) {
                 return new CxSocketConnection();
 
                 function CxSocketConnection() {
@@ -194,14 +194,14 @@ angular.module('ngAutobahn.connection', [])
                         } else {
                             _connection = new autobahn.Connection(autobahnOptions);
 
-                            _connection.onopen = function(session) {
+                            _connection.onopen = function (session) {
                                 _session = session;
                                 _ping.start();
                                 defer.resolve(session);
                                 notifyConnectionIsOpened();
                             };
 
-                            _connection.onclose = function(reason) {
+                            _connection.onclose = function (reason) {
                                 defer.reject();
                                 notifyConnectionIsLost(reason);
                             };
@@ -229,7 +229,7 @@ angular.module('ngAutobahn.connection', [])
 
                         if (_connection) {
                             _ping.stop();
-                            _connection.onclose = function(reason) {
+                            _connection.onclose = function (reason) {
                                 _connection = null;
                                 defer.resolve();
                             };
