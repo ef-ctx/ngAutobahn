@@ -1,210 +1,216 @@
-/*****************************************************************************
- *
- * @ngdoc module
- * @name ngAutobahn.session
- * @module ngAutobahn.session
- * @description
- *
- *****************************************************************************/
-angular.module('ngAutobahn.session', [
-    'ngAutobahn.connection',
-    'ngAutobahn.messageBroker'
-])
+(function (angular) {
+    'use strict';
 
-/*****************************************************************************
- *
- * @ngdoc service
- * @name ngAutobahn.session
- * @module ngAutobahn.session
- * @description
- *
- *****************************************************************************/
-.service('ngAutobahnSession', [
-    '$q',
-    '$rootScope',
-    'ngAutobahnConnection',
-    'NgAutobahnMessageBroker',
-    'NG_AUTOBAHN_CONNECTION_EVENTS',
-    function ngAutobahnSessionService(
-        $q,
-        $rootScope,
-        ngAutobahnConnection,
-        NgAutobahnMessageBroker,
-        NG_AUTOBAHN_CONNECTION_EVENTS
-    ) {
-        'use strict';
+    /*****************************************************************************
+     *
+     * @ngdoc module
+     * @name ngAutobahn.session
+     * @module ngAutobahn.session
+     * @description
+     *
+     *****************************************************************************/
+    angular.module('ngAutobahn.session', [
+        'ngAutobahn.connection',
+        'ngAutobahn.messageBroker'
+    ])
 
-        return new NgAutobachSession();
+    /*****************************************************************************
+     *
+     * @ngdoc service
+     * @name ngAutobahn.session
+     * @module ngAutobahn.session
+     * @description
+     *
+     *****************************************************************************/
+    .service('ngAutobahnSession', [
+        '$q',
+        '$rootScope',
+        'ngAutobahnConnection',
+        'NgAutobahnMessageBroker',
+        'NG_AUTOBAHN_CONNECTION_EVENTS',
+        function ngAutobahnSessionService(
+            $q,
+            $rootScope,
+            ngAutobahnConnection,
+            NgAutobahnMessageBroker,
+            NG_AUTOBAHN_CONNECTION_EVENTS
+        ) {
 
-        function NgAutobachSession() {
-            var self = this,
-                _session,
-                _subscriptions = [],
-                _brokers = {};
+            return new NgAutobachSession();
 
-            this.subscribe = subscribe;
-            this.remoteCall = remoteCall;
-            this.destroy = destroy;
+            function NgAutobachSession() {
+                var self = this,
+                    _session,
+                    _subscriptions = [],
+                    _brokers = {};
 
-            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, connectionClosedHandler);
-            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionClosedHandler);
+                this.subscribe = subscribe;
+                this.remoteCall = remoteCall;
+                this.destroy = destroy;
 
-            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, connectionClosedHandler);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionClosedHandler);
 
-            /****************************************************************
-             * SUBSCRIBE
-             ***************************************************************/
-            function subscribe(channel) {
-                var defer = $q.defer(),
-                    broker = createBroker(channel);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
 
-                if (!channel) {
-                    throw new Error('ngAutobahn.session.subscribe error: Trying to subscribe withous specifying channel');
-                }
+                /****************************************************************
+                 * SUBSCRIBE
+                 ***************************************************************/
+                function subscribe(channel) {
+                    var defer = $q.defer(),
+                        broker = createBroker(channel);
 
-                if (!_session) {
-                    ngAutobahnConnection.openConnection()
-                        .then(_setSession)
-                        .finally(resolveBroker);
-                } else {
-                    subscribeBrokerToSessionChannel(broker, channel);
-                    resolveBroker();
-                }
+                    if (!channel) {
+                        throw new Error('ngAutobahn.session.subscribe error: Trying to subscribe withous specifying channel');
+                    }
 
-                return defer.promise;
+                    if (!_session) {
+                        ngAutobahnConnection.openConnection()
+                            .then(_setSession)
+                            .finally(resolveBroker);
+                    } else {
+                        subscribeBrokerToSessionChannel(broker, channel);
+                        resolveBroker();
+                    }
 
-                function resolveBroker() {
-                    defer.resolve(broker.facade);
-                }
-            }
+                    return defer.promise;
 
-            function _setSession(session) {
-                _session = session;
-            }
-
-            function createBroker(channel) {
-                var broker = new NgAutobahnMessageBroker(channel, publish);
-
-                if (!_brokers[channel]) {
-                    _brokers[channel] = [];
-                }
-                _brokers[channel].push(broker);
-
-                return broker;
-            }
-
-            function subscribeBrokerToSessionChannel(broker, channel) {
-                var subscription = _session.subscribe(channel, broker.messageReceivedHandler)
-                    .then(storeSubscription);
-
-                function storeSubscription(subscription) {
-                    _subscriptions.push(subscription);
-                }
-            }
-
-            function subscribeHandlers() {
-                for (var channel in _brokers) {
-                    var brokers = _brokers[channel];
-                    for (var ix = 0; ix < brokers.length; ix++) {
-                        subscribeBrokerToSessionChannel(brokers[ix], channel);
+                    function resolveBroker() {
+                        defer.resolve(broker.facade);
                     }
                 }
-            }
 
-            /****************************************************************
-             * CONNECTION EVENT HANDLERS
-             ***************************************************************/
-            function connectionOpenedHandler(evt, session) {
-                if (!_session) {
+                function _setSession(session) {
                     _session = session;
-                    subscribeHandlers();
-                }
-            }
-
-            function connectionClosedHandler(evt, reason) {
-                _session = null;
-                _subscriptions = [];
-            }
-
-            /****************************************************************
-             * REMOTE CALL
-             ***************************************************************/
-            function remoteCall(methodName, payload) {
-                var _defer = $q.defer(),
-                    _payload = payload || {};
-
-                if (!_session) {
-                    ngAutobahnConnection.openConnection()
-                        .then(invokeRemoteCall);
-                } else {
-                    invokeRemoteCall();
                 }
 
-                return _defer.promise;
+                function createBroker(channel) {
+                    var broker = new NgAutobahnMessageBroker(channel, publish);
 
-                function invokeRemoteCall() {
-                    _session.call(methodName, [], payload)
-                        .then(_defer.resolve, _defer.reject)
-                        .finally($rootScope.$applyAsync);
+                    if (!_brokers[channel]) {
+                        _brokers[channel] = [];
+                    }
+                    _brokers[channel].push(broker);
+
+                    return broker;
                 }
-            }
 
-            /****************************************************************
-             * PUBLISH
-             ***************************************************************/
-            function publish(channel, message, payload) {
-                var _defer = $q.defer(),
-                    _payload, _options;
+                function subscribeBrokerToSessionChannel(broker, channel) {
+                    var subscription = _session.subscribe(channel, broker.messageReceivedHandler)
+                        .then(storeSubscription);
 
-                if (_session) {
-                    _payload = formatPublishPayload(message, payload);
-                    _options = {
-                        acknowledge: true
+                    function storeSubscription(subscription) {
+                        _subscriptions.push(subscription);
+                    }
+                }
+
+                function subscribeHandlers() {
+                    for (var channel in _brokers) {
+                        var brokers = _brokers[channel];
+                        for (var ix = 0; ix < brokers.length; ix++) {
+                            subscribeBrokerToSessionChannel(brokers[ix], channel);
+                        }
+                    }
+                }
+
+                /****************************************************************
+                 * CONNECTION EVENT HANDLERS
+                 ***************************************************************/
+                function connectionOpenedHandler(evt, session) {
+                    if (!_session) {
+                        _session = session;
+                        subscribeHandlers();
+                    }
+                }
+
+                function connectionClosedHandler(evt, reason) {
+                    _session = null;
+                    _subscriptions = [];
+                }
+
+                /****************************************************************
+                 * REMOTE CALL
+                 ***************************************************************/
+                function remoteCall(methodName, payload) {
+                    var _defer = $q.defer(),
+                        _payload = payload || {};
+
+                    if (!_session) {
+                        ngAutobahnConnection.openConnection()
+                            .then(invokeRemoteCall);
+                    } else {
+                        invokeRemoteCall();
+                    }
+
+                    return _defer.promise;
+
+                    function invokeRemoteCall() {
+                        _session.call(methodName, [], payload)
+                            .then(_defer.resolve, _defer.reject)
+                            .finally($rootScope.$applyAsync);
+                    }
+                }
+
+                /****************************************************************
+                 * PUBLISH
+                 ***************************************************************/
+                function publish(channel, message, payload) {
+                    var _defer = $q.defer(),
+                        _payload, _options;
+
+                    if (_session) {
+                        _payload = formatPublishPayload(message, payload);
+                        _options = {
+                            acknowledge: true
+                        };
+
+                        _session.publish(channel, [], formatPublishPayload(message, payload), _options)
+                            .then(_defer.resolve, _defer.reject)
+                            .finally($rootScope.$applyAsync);
+                    } else {
+                        _defer.reject('ngAutobahnConnection error no session was established');
+                    }
+
+                    return _defer.promise;
+                }
+
+                function formatPublishPayload(message, payload) {
+                    return {
+                        type: message,
+                        data: payload || {}
                     };
-
-                    _session.publish(channel, [], formatPublishPayload(message, payload), _options)
-                        .then(_defer.resolve, _defer.reject)
-                        .finally($rootScope.$applyAsync);
-                } else {
-                    _defer.reject('ngAutobahnConnection error no session was established');
                 }
 
-                return _defer.promise;
-            }
+                /****************************************************************
+                 * DESTROY
+                 ***************************************************************/
+                function destroy() {
+                    var defer = $q.defer();
 
-            function formatPublishPayload(message, payload) {
-                return {
-                    type: message,
-                    data: payload || {}
-                };
-            }
+                    cleanAllSubscriptions();
 
-            /****************************************************************
-             * DESTROY
-             ***************************************************************/
-            function destroy() {
-                var defer = $q.defer();
+                    cleanAllBrokers();
 
-                cleanAllSubscriptions();
+                    ngAutobahnConnection.closeConnection()
+                        .then(defer.resolve, defer.reject);
 
-                cleanAllBrokers();
-
-                ngAutobahnConnection.closeConnection()
-                    .then(defer.resolve, defer.reject);
-
-                return defer.promise;
-            }
-
-            function cleanAllSubscriptions() {
-                if (_subscriptions.length > 0) {
-                    _session.unsubscribe(_subscriptions.pop());
-                    return cleanAllSubscriptions();
+                    return defer.promise;
                 }
-            }
 
-            function cleanAllBrokers() {
-                _brokers = [];
+                function cleanAllSubscriptions() {
+                    if (_subscriptions.length > 0) {
+                        _session.unsubscribe(_subscriptions.pop());
+                        return cleanAllSubscriptions();
+                    }
+                }
+
+                function cleanAllBrokers() {
+                    _brokers = [];
+                }
             }
         }
-    }
-]);
+    ]);
+
+    /*****************************************************************************/
+
+})(angular);
