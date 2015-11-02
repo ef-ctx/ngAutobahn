@@ -1,5 +1,5 @@
-describe('cxSocketMessageBroker', function () {
-    /*'use strict';
+describe('NgAutobahnMessageBroker', function () {
+    'use strict';
 
     var $timeout,
         broker,
@@ -15,7 +15,7 @@ describe('cxSocketMessageBroker', function () {
             publish: function () {},
         };
 
-    beforeEach(module('cxSocketMessageBroker'));
+    beforeEach(module('ngAutobahn.messageBroker'));
 
     beforeEach(function spyes() {
         spyOn(handlers, 'success').and.callThrough();
@@ -24,14 +24,14 @@ describe('cxSocketMessageBroker', function () {
         spyOn(handlers, 'publish').and.callThrough();
     });
 
-    beforeEach(inject(function (_$timeout_, CxSocketMessageBroker) {
+    beforeEach(inject(function (_$timeout_, NgAutobahnMessageBroker) {
         $timeout = _$timeout_;
-        broker = new CxSocketMessageBroker(channel, handlers.publish);
+        broker = new NgAutobahnMessageBroker(channel, handlers.publish);
     }));
 
     describe('constructor', function () {
-        it('should be a function', inject(function (CxSocketMessageBroker) {
-            expect(typeof CxSocketMessageBroker).toBe('function');
+        it('should be a function', inject(function (NgAutobahnMessageBroker) {
+            expect(typeof NgAutobahnMessageBroker).toBe('function');
         }));
 
         it('should return a facade to provide access to pubsub methods', inject(function () {
@@ -71,6 +71,6 @@ describe('cxSocketMessageBroker', function () {
             }));
         });
 
-    });*/
+    });
 
 });
