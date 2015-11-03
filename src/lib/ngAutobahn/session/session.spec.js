@@ -4,7 +4,6 @@ describe('ngAutobahnSession', function () {
     var $q,
         $timeout,
         $rootScope,
-        CXSOCKET_CONNECTION_EVENTS,
         channelHandlers = {},
         autobahn = {
             session: {
