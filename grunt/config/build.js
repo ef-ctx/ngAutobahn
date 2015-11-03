@@ -80,7 +80,8 @@ module.exports = function (grunt, data) {
                     'jsbeautifier:beautify_src_js',
                     'jshint:src_js',
                     'group-build_js',
-                    'group-build_test'
+                    'group-build_test',
+                    'dist'
                 ]
             },
 
@@ -92,7 +93,8 @@ module.exports = function (grunt, data) {
                 tasks: [
                     'jsbeautifier:beautify_src_spec',
                     'jshint:src_spec',
-                    'group-build_test'
+                    'group-build_test',
+                    'dist'
                 ]
             },
 
