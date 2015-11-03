@@ -37,7 +37,7 @@
                     facade: {
                         publish: publish,
                         subscribe: subscribe,
-                        getChannel: getChannel
+                        getChannel: getChannel // legacy. This should NOT be exposed. See ln 21
                     },
                     messageReceivedHandler: messageReceivedHandler
                 };
@@ -57,9 +57,19 @@
                     return _publish(_channel, message, payload);
                 }
 
+                /****************************************************************
+                 *
+                 * IMPORTANT NOTE:
+                 *
+                 * This is legacy from the services and design we built ngAutobahn for and
+                 * should be removed as soon as we refactor it ( Sorry about that :( ).
+                 *
+                 * The idea is to expose a facade with publish and subscribe only
+                 * so that the channel is hidden and lives as a private variable of the Broker.
+                 *
+                 ***************************************************************/
                 function getChannel() {
                     return _channel;
-
                 }
 
                 /****************************************************************
