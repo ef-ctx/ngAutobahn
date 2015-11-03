@@ -14,6 +14,21 @@
         'ngAutobahn.utils.ping'
     ])
 
+    /**********************************************************
+     *
+     * @ngdoc constant
+     * @name NG_AUTOBAHN_CONNECTION_STATUS
+     * @module ngAutobahn.connection
+     * @description exposed connection states
+     *
+     **********************************************************/
+
+    .constant('NG_AUTOBAHN_CONNECTION_STATUS', {
+        OPENED: 'ngAutobahn.connection.state.opened',
+        CLOSED: 'ngAutobahn.connection.state.closed',
+        LOST: 'ngAutobahn.connection.state.lost'
+    })
+
     /*****************************************************************************
      *
      * @ngdoc constant
@@ -98,8 +113,15 @@
                 '$q',
                 '$rootScope',
                 'Ping',
+                'NG_AUTOBAHN_CONNECTION_STATUS',
                 'NG_AUTOBAHN_CONNECTION_EVENTS',
-                function ($q, $rootScope, Ping, NG_AUTOBAHN_CONNECTION_EVENTS) {
+                function (
+                    $q,
+                    $rootScope,
+                    Ping,
+                    NG_AUTOBAHN_CONNECTION_STATUS,
+                    NG_AUTOBAHN_CONNECTION_EVENTS
+                ) {
 
                     return new CxSocketConnection();
 
@@ -107,10 +129,35 @@
                         var self = this,
                             _session,
                             _connection,
+                            _status = NG_AUTOBAHN_CONNECTION_STATUS.CLOSED,
                             _ping = new Ping(pingFn, reconnect);
 
                         self.openConnection = openConnection;
                         self.closeConnection = closeConnection;
+
+                        Object.defineProperty(self, 'status', {
+                            get: function statusGetter() {
+                                return _status;
+                            }
+                        });
+
+                        Object.defineProperty(self, 'isOpen', {
+                            get: function () {
+                                return _status === NG_AUTOBAHN_CONNECTION_STATUS.OPENED;
+                            }
+                        });
+
+                        Object.defineProperty(self, 'isClosed', {
+                            get: function () {
+                                return _status === NG_AUTOBAHN_CONNECTION_STATUS.CLOSED;
+                            }
+                        });
+
+                        Object.defineProperty(self, 'isLost', {
+                            get: function () {
+                                return _status === NG_AUTOBAHN_CONNECTION_STATUS.LOST;
+                            }
+                        });
 
                         /****************************************************************
                          * OPEN
@@ -121,7 +168,7 @@
 
                             if (_connection) {
                                 defer.resolve(_session);
-                                notifyConnectionIsOpened();
+                                _connectionOpenedHandler();
                             } else {
                                 _connection = new autobahn.Connection(autobahnOptions);
 
@@ -129,12 +176,12 @@
                                     _session = session;
                                     _ping.start();
                                     defer.resolve(session);
-                                    notifyConnectionIsOpened();
+                                    _connectionOpenedHandler();
                                 };
 
                                 _connection.onclose = function (reason) {
                                     defer.reject();
-                                    notifyConnectionIsLost(reason);
+                                    _connectionLostHandler();
                                 };
 
                                 _connection.open();
@@ -149,7 +196,7 @@
 
                         function closeConnection() {
                             return _closeConnection()
-                                .then(notifyConnectionIsClosed);
+                                .then(_connectionClosedHandler);
                         }
 
                         function _closeConnection() {
@@ -174,7 +221,7 @@
                          ***************************************************************/
 
                         function reconnect() {
-                            notifyConnectionIsLost();
+                            _connectionLostHandler();
 
                             _closeConnection()
                                 .then(openConnection);
@@ -184,6 +231,24 @@
                             return _session.call('ping');
                         }
 
+                        /****************************************************************
+                         * HANDLERS
+                         ***************************************************************/
+
+                        function _connectionLostHandler() {
+                            _status = NG_AUTOBAHN_CONNECTION_STATUS.LOST;
+                            notifyConnectionIsLost();
+                        }
+
+                        function _connectionClosedHandler() {
+                            _status = NG_AUTOBAHN_CONNECTION_STATUS.CLOSED;
+                            notifyConnectionIsClosed();
+                        }
+
+                        function _connectionOpenedHandler() {
+                            _status = NG_AUTOBAHN_CONNECTION_STATUS.OPENED;
+                            notifyConnectionIsOpened();
+                        }
                         /****************************************************************
                          * NOTIFIERS
                          ***************************************************************/
