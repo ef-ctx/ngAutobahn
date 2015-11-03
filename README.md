@@ -7,18 +7,20 @@ Provides a simple and easy way to interact with real time services using WAMP pr
 
 * **ngAutobahn.connection** Including:
   * **ngAutobahnConnectionProvider** provider which provides a configurable service for the connection
-  * **ngAutobahnConnection** services which provides:
-    * openConnection method
-    * closeConnection method
-    * status constant
+  * **ngAutobahnConnection** service which provides:
+    * openConnection
+    * closeConnection
+    * status
     * isOpened
     * isClosed
     * isLost
 
 * **ngAutobahn.session**. Including:
   * **ngAutobahnSession** service which provides:
-    * subscribe method subscribes to a channel and returns a broker object with methods to publish and subscribe messages in the channel.
-    * remoteCall method performs an rpc call
+    * subscribe
+      * subscribes to a channel and returns a broker object with methods to publish and subscribe messages in the channel.
+    * remoteCall
+      * performs an rpc call
 
 ## And a helper module
 
