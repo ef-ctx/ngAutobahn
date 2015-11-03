@@ -1,5 +1,28 @@
 # ngAutobahn
-angular modules for autobahn real time services over WAMP web socket protocol
+angular modules for autobahn real time services over WAMP web socket protocol.
+
+Provides a simple and easy way to interact with real time services using WAMP protocol.
+
+## It is formed by 3 main modules:
+
+* **ngAutobahn.connection** Including:
+  * **ngAutobahnConnectionProvider** provider which provides a configurable service for the connection
+  * **ngAutobahnConnection** services which provides:
+    * openConnection method
+    * closeConnection method
+    * status constant
+    * isOpened
+    * isClosed
+    * isLost
+
+* **ngAutobahn.session**. Including:
+  * **ngAutobahnSession** service which provides:
+    * subscribe method subscribes to a channel and returns a broker object with methods to publish and subscribe messages in the channel.
+    * remoteCall method performs an rpc call
+
+## And a helper module
+
+* **ngAutobahn.utils.ping**
 
 # ngAutobahn
 [![Build Status: Linux](http://img.shields.io/travis/ef-ctx/ngAutobahn/master.svg?style=flat-square)](https://travis-ci.org/ef-ctx/ngAutobahn)
