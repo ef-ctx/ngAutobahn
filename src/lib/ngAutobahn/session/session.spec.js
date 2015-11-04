@@ -409,14 +409,14 @@ describe('ngAutobahnSession', function () {
         });
     });
 
-    describe('destroy', function () {
+    describe('end', function () {
         it('should be a function', inject(function (ngAutobahnSession) {
-            expect(typeof ngAutobahnSession.destroy).toBe('function');
+            expect(typeof ngAutobahnSession.end).toBe('function');
         }));
 
         describe('promise', function () {
             it('should return a promise', inject(function (ngAutobahnSession) {
-                var promise = ngAutobahnSession.destroy();
+                var promise = ngAutobahnSession.end();
                 expect(typeof promise.then).toBe('function');
             }));
 
@@ -424,7 +424,7 @@ describe('ngAutobahnSession', function () {
                 ngAutobahnConnection.openConnection();
                 $timeout.flush();
 
-                ngAutobahnSession.destroy().then(handlers.success);
+                ngAutobahnSession.end().then(handlers.success);
                 $timeout.flush();
 
                 expect(handlers.success).toHaveBeenCalled();
@@ -455,7 +455,7 @@ describe('ngAutobahnSession', function () {
             expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_channel2);
 
             /*
-            ngAutobahnSession.destroy();
+            ngAutobahnSession.end();
 
             ngAutobahnConnection.openConnection();
 
@@ -484,7 +484,7 @@ describe('ngAutobahnSession', function () {
             });
             $timeout.flush();
 
-            ngAutobahnSession.destroy();
+            ngAutobahnSession.end();
             $timeout.flush();
 
             expect(autobahn.session.unsubscribe).toHaveBeenCalled();
@@ -492,12 +492,12 @@ describe('ngAutobahnSession', function () {
 
         it('should invoke ngAutobahnConnection.close', inject(function (ngAutobahnSession) {
             ngAutobahnSession.subscribe('foo');
-            ngAutobahnSession.destroy();
+            ngAutobahnSession.end();
             $timeout.flush();
             expect(ngAutobahnConnection.closeConnection).toHaveBeenCalled();
         }));
 
-        it('should invoke destroy on all brokers', inject(function (ngAutobahnSession) {
+        it('should invoke end on all brokers', inject(function (ngAutobahnSession) {
 
         }));
 

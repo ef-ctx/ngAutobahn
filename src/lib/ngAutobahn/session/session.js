@@ -36,9 +36,9 @@
             NG_AUTOBAHN_CONNECTION_EVENTS
         ) {
 
-            return new NgAutobachSession();
+            return new NgAutobahnSession();
 
-            function NgAutobachSession() {
+            function NgAutobahnSession() {
                 var self = this,
                     _session,
                     _subscriptions = [],
@@ -46,12 +46,11 @@
 
                 this.subscribe = subscribe;
                 this.remoteCall = remoteCall;
-                this.destroy = destroy;
-
-                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, connectionClosedHandler);
-                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionClosedHandler);
+                this.end = end;
 
                 $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, connectionClosedHandler);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionClosedHandler);
 
                 /****************************************************************
                  * SUBSCRIBE
@@ -182,12 +181,20 @@
                 }
 
                 /****************************************************************
+                 * CLOSE
+                 ***************************************************************/
+
+                function end() {
+                    return _destroy();
+                }
+
+                /****************************************************************
                  * DESTROY
                  ***************************************************************/
-                function destroy() {
+                function _destroy() {
                     var defer = $q.defer();
 
-                    cleanAllSubscriptions();
+                    _cleanAllSubscriptions();
 
                     cleanAllBrokers();
 
@@ -197,10 +204,10 @@
                     return defer.promise;
                 }
 
-                function cleanAllSubscriptions() {
+                function _cleanAllSubscriptions() {
                     if (_subscriptions.length > 0) {
                         _session.unsubscribe(_subscriptions.pop());
-                        return cleanAllSubscriptions();
+                        return _cleanAllSubscriptions();
                     }
                 }
 
