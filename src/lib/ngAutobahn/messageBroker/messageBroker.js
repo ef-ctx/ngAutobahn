@@ -29,7 +29,7 @@
 
             return NgAutobahnMessageBroker;
 
-            function NgAutobahnMessageBroker(channel, _publish) {
+            function NgAutobahnMessageBroker(channel, publishFn) {
                 var _channel = channel,
                     _messageHandlers = {};
 
@@ -54,7 +54,7 @@
                 }
 
                 function publish(message, payload) {
-                    return _publish(_channel, message, payload);
+                    return publishFn(_channel, message, payload);
                 }
 
                 /****************************************************************
