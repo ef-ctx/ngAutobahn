@@ -14,17 +14,19 @@ Provides a simple and easy way to interact with real time services using WAMP pr
   * Losing Socket connection due to a failure only in the socket layer:
     * Autobahn already provides this feature.
 
-  * Losing Socket connection due to losing Internet connection:
-    * in this case most of the browsers take a lot of time to reconnect,
-      in order to detect a broken connection faster, ngAutobahn provides a configurable **Ping service**
-      allowing to close the current connection and try to open a new one when it reaches a deadline.
+  * Losing Socket connection due to loss of Internet connection:
+    * Chrome has an issue dropping socket connections when network connection dies. [Issue](https://code.google.com/p/chromium/issues/detail?id=76358)
+      In this case we came up with a [Ping service](https://github.com/ef-ctx/ngAutobahn/tree/master/src/lib/ngAutobahn/utils/ping)
+      which allow a promise returning function to be called repeatedly
+      and if the promise is not resolved after a certain amount of time we disconnect and try to establish a new connection,
+      using ping is not enabled by default but it is there to use in the case of need.
 
 * **Simple way of interacting with WAMP**
 
   * **Perform an RPC call through the websocket layer.**
-    * handles opening connection under the hood if the connection is not opened.
-    * opens the connection and when it is opened it performs the rpc.
-    * returns a promise which resolves in the function response.
+    * Handles opening connection under the hood if the connection is not opened.
+    * Opens the connection and when it is opened it performs the rpc.
+    * Returns a promise which resolves in the function response.
 
     ```javascript
     ngAutobahnSession.remoteCall('remoteMethodName', payload)
@@ -34,9 +36,9 @@ Provides a simple and easy way to interact with real time services using WAMP pr
     ```
 
   * **Subscribe to a channel.**
-    * handles opening connection under the hood if the connection is not opened.
-    * opens the connection and when it is opened it performs the subscription.
-    * returns a promise which resolves in a broker object to interact with the
+    * Handles opening connection under the hood if the connection is not opened.
+    * Opens the connection and when it is opened it performs the subscription.
+    * Returns a promise which resolves in a broker object to interact with the
       session providing methods for publish messages and subscribe handlers
 
     ```javascript
@@ -57,7 +59,7 @@ Provides a simple and easy way to interact with real time services using WAMP pr
     ```
 
   * **Publish Message.**
-    * subscribe function returns a promise which resolves in a Broker object.
+    * Subscribe function returns a promise which resolves in a Broker object.
     * The broker object provides a `publish` method to publish messages.
     * The publish method returns a promise which will be resolved if the publishing succeed and rejected if it fails (eg. loosing connection).
 
