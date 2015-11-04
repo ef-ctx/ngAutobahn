@@ -17,9 +17,7 @@
      * @description module for socket connection matters
      *
      *****************************************************************************/
-    angular.module('ngAutobahn.connection', [
-        'ngAutobahn.utils.ping'
-    ])
+    angular.module('ngAutobahn.connection', [])
 
     /**********************************************************
      *
@@ -62,8 +60,7 @@
      *****************************************************************************/
 
     .provider('ngAutobahnConnection', [
-        'PingProvider',
-        function ngAutobahnConnectionProvider(PingProvider) {
+        function ngAutobahnConnectionProvider() {
             /**
              * @type {Object} provider configuration used in service/factory below
              */
@@ -78,10 +75,6 @@
                         delayGrowthFactor: 1.5, // float - The growth factor applied to the retry delay between reconnection attempts (default: 1.5).
                         maxDelay: 300, // float - Maximum delay for reconnection attempts in seconds (default: 300).
                         delayJitter: 0.1 // float - The standard deviation of a Gaussian to jitter the delay on each retry cycle as a fraction of the mean (default: 0.1).
-                    },
-                    ping: {
-                        delay: 5000,
-                        timeout: 10000
                     }
                 };
 
@@ -109,23 +102,16 @@
                     max_retry_delay: serviceConfig.retries.maxDelay,
                     retry_delay_jitter: serviceConfig.retries.delayJitter
                 };
-
-                PingProvider.configure({
-                    delay: serviceConfig.ping.delay,
-                    maxResponseDelay: serviceConfig.ping.timeout
-                });
             };
 
             this.$get = [
                 '$q',
                 '$rootScope',
-                'Ping',
                 'NG_AUTOBAHN_CONNECTION_STATUS',
                 'NG_AUTOBAHN_CONNECTION_EVENTS',
                 function (
                     $q,
                     $rootScope,
-                    Ping,
                     NG_AUTOBAHN_CONNECTION_STATUS,
                     NG_AUTOBAHN_CONNECTION_EVENTS
                 ) {
@@ -136,11 +122,11 @@
                         var self = this,
                             _session,
                             _connection,
-                            _status = NG_AUTOBAHN_CONNECTION_STATUS.CLOSED,
-                            _ping = new Ping(pingFn, reconnect);
+                            _status = NG_AUTOBAHN_CONNECTION_STATUS.CLOSED;
 
                         self.openConnection = openConnection;
                         self.closeConnection = closeConnection;
+                        self.resetConnection = resetConnection;
 
                         Object.defineProperty(self, 'status', {
                             get: function statusGetter() {
@@ -181,7 +167,6 @@
 
                                 _connection.onopen = function (session) {
                                     _session = session;
-                                    _ping.start();
                                     defer.resolve(session);
                                     _connectionOpenedHandler();
                                 };
@@ -210,7 +195,6 @@
                             var defer = $q.defer();
 
                             if (_connection) {
-                                _ping.stop();
                                 _connection.onclose = function (reason) {
                                     _connection = null;
                                     defer.resolve();
@@ -224,18 +208,14 @@
                         }
 
                         /****************************************************************
-                         * HELPERS
+                         * RESET
                          ***************************************************************/
 
-                        function reconnect() {
+                        function resetConnection() {
                             _connectionLostHandler();
 
                             _closeConnection()
                                 .then(openConnection);
-                        }
-
-                        function pingFn() {
-                            return _session.call('ping');
                         }
 
                         /****************************************************************
@@ -623,6 +603,105 @@
     ]);
 
     /*****************************************************************************/
+
+})(angular);
+
+(function (angular) {
+    'use strict';
+
+    /**********************************************************
+     *
+     * @ngdoc module
+     * @name ngAutobahn.utils.connectionPing
+     * @module ngAutobahn.utils.connectionPing
+     * @description provides a configurable way to ping the server using a configurable rpc call
+     *
+     **********************************************************/
+
+    angular.module('ngAutobahn.utils.connectionPing', [
+        'ngAutobahn.utils.ping'
+    ])
+
+    /**********************************************************
+     *
+     * @ngdoc provider
+     * @name ngAutobahnConnectionPing
+     * @module ngAutobahn.utils.connectionPing
+     *
+     **********************************************************/
+
+    .provider('ngAutobahnConnectionPing', [
+        'PingProvider',
+        function (PingProvider) {
+            var self = this,
+                configuration = {
+                    pingMessage: 'ping',
+                    delay: 1500,
+                    maxResponseDelay: 3000
+                };
+
+            PingProvider.configure({
+                delay: configuration.delay,
+                maxResponseDelay: configuration.maxResponseDelay
+            });
+
+            self.configure = function configure(config) {
+                angular.extend(configuration, config);
+            };
+
+            self.$get = [
+                '$rootScope',
+                'ngAutobahnConnection',
+                'ngAutobahnSession',
+                'Ping',
+                'NG_AUTOBAHN_CONNECTION_EVENTS',
+                function (
+                    $rootScope,
+                    ngAutobahnConnection,
+                    ngAutobahnSession,
+                    Ping,
+                    NG_AUTOBAHN_CONNECTION_EVENTS
+                ) {
+
+                    return new NgAutobahnConnectionPing();
+
+                    function NgAutobahnConnectionPing() {
+                        var self = this,
+                            _ping = new Ping(pingFn, errorFn);
+
+                        self.activate = function () {
+                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
+
+                            if (ngAutobahnConnection.isOpened) {
+                                _ping.start();
+                            }
+                        };
+
+                        /****************************************************************
+                         * PING FUNCTIONS
+                         ***************************************************************/
+
+                        function errorFn() {
+                            return ngAutobahnConnection.resetConnection();
+                        }
+
+                        function pingFn() {
+                            return ngAutobahnSession.remoteCall(configuration.pingMessage);
+                        }
+
+                        /****************************************************************
+                         * CONNECTION EVENT HANDLERS
+                         ***************************************************************/
+
+                        function connectionOpenedHandler(evt, session) {
+                            _ping.start();
+                        }
+
+                    }
+                }
+            ];
+        }
+    ]);
 
 })(angular);
 
