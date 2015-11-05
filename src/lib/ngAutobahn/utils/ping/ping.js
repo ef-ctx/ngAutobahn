@@ -25,18 +25,20 @@
      *****************************************************************************/
 
     .provider('Ping', [
+
         function () {
 
-            var config = {
-                delay: 1500,
-                maxResponseDelay: 3000
-            };
+            var self = this,
+                config = {
+                    delay: 1500,
+                    maxResponseDelay: 3000
+                };
 
-            this.configure = function (configuration) {
+            self.configure = function (configuration) {
                 angular.extend(config, configuration);
             };
 
-            this.$get = [
+            self.$get = [
                 '$timeout',
                 '$interval',
                 function ($timeout, $interval) {

@@ -1,5 +1,5 @@
 /**
- * ngAutobahn - v0.0.2 - 2015-11-04
+ * ngAutobahn - v0.0.2 - 2015-11-05
  * https://github.com/ef-ctx/ngAutobahn
  *
  * Copyright (c) 2015 EF CTX <http://efclass.io>
@@ -619,6 +619,7 @@
      **********************************************************/
 
     angular.module('ngAutobahn.utils.connectionPing', [
+        'ngAutobahn',
         'ngAutobahn.utils.ping'
     ])
 
@@ -647,6 +648,7 @@
 
             self.configure = function configure(config) {
                 angular.extend(configuration, config);
+                return configuration;
             };
 
             self.$get = [
@@ -670,7 +672,9 @@
                             _ping = new Ping(pingFn, errorFn);
 
                         self.activate = function () {
-                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
+                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _ping.start);
+                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, _ping.stop);
+                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, _ping.stop);
 
                             if (ngAutobahnConnection.isOpened) {
                                 _ping.start();
@@ -687,14 +691,6 @@
 
                         function pingFn() {
                             return ngAutobahnSession.remoteCall(configuration.pingMessage);
-                        }
-
-                        /****************************************************************
-                         * CONNECTION EVENT HANDLERS
-                         ***************************************************************/
-
-                        function connectionOpenedHandler(evt, session) {
-                            _ping.start();
                         }
 
                     }
@@ -732,18 +728,20 @@
      *****************************************************************************/
 
     .provider('Ping', [
+
         function () {
 
-            var config = {
-                delay: 1500,
-                maxResponseDelay: 3000
-            };
+            var self = this,
+                config = {
+                    delay: 1500,
+                    maxResponseDelay: 3000
+                };
 
-            this.configure = function (configuration) {
+            self.configure = function (configuration) {
                 angular.extend(config, configuration);
             };
 
-            this.$get = [
+            self.$get = [
                 '$timeout',
                 '$interval',
                 function ($timeout, $interval) {

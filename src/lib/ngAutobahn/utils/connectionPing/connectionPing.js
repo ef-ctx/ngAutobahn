@@ -11,6 +11,7 @@
      **********************************************************/
 
     angular.module('ngAutobahn.utils.connectionPing', [
+        'ngAutobahn',
         'ngAutobahn.utils.ping'
     ])
 
@@ -39,6 +40,7 @@
 
             self.configure = function configure(config) {
                 angular.extend(configuration, config);
+                return configuration;
             };
 
             self.$get = [
@@ -62,7 +64,9 @@
                             _ping = new Ping(pingFn, errorFn);
 
                         self.activate = function () {
-                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
+                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _ping.start);
+                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, _ping.stop);
+                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, _ping.stop);
 
                             if (ngAutobahnConnection.isOpened) {
                                 _ping.start();
@@ -79,14 +83,6 @@
 
                         function pingFn() {
                             return ngAutobahnSession.remoteCall(configuration.pingMessage);
-                        }
-
-                        /****************************************************************
-                         * CONNECTION EVENT HANDLERS
-                         ***************************************************************/
-
-                        function connectionOpenedHandler(evt, session) {
-                            _ping.start();
                         }
 
                     }
