@@ -144,7 +144,7 @@
                     return _defer.promise;
 
                     function invokeRemoteCall() {
-                        _session.call(methodName, [], payload)
+                        _session.call(methodName, [], _payload)
                             .then(_defer.resolve, _defer.reject)
                             .finally(_triggerDigest);
                     }
