@@ -1,5 +1,5 @@
 /**
- * ngAutobahn - v0.0.2 - 2015-11-05
+ * ngAutobahn - v0.0.2 - 2015-11-27
  * https://github.com/ef-ctx/ngAutobahn
  *
  * Copyright (c) 2015 EF CTX <http://efclass.io>
@@ -514,7 +514,7 @@
                 /****************************************************************
                  * REMOTE CALL
                  ***************************************************************/
-                function remoteCall(methodName, payload) {
+                function remoteCall(methodName, payload, triggerDigestCycle) {
                     var _defer = $q.defer(),
                         _payload = payload || {};
 
@@ -528,9 +528,15 @@
                     return _defer.promise;
 
                     function invokeRemoteCall() {
-                        _session.call(methodName, [], payload)
+                        _session.call(methodName, [], _payload)
                             .then(_defer.resolve, _defer.reject)
-                            .finally($rootScope.$applyAsync);
+                            .finally(_triggerDigest);
+                    }
+
+                    function _triggerDigest() {
+                        if (triggerDigestCycle) {
+                            $rootScope.$applyAsync();
+                        }
                     }
                 }
 
@@ -632,8 +638,8 @@
      **********************************************************/
 
     .provider('ngAutobahnConnectionPing', [
-        'PingProvider',
-        function (PingProvider) {
+        'NgAutobahnPingProvider',
+        function (NgAutobahnPingProvider) {
             var self = this,
                 configuration = {
                     pingMessage: 'ping',
@@ -641,7 +647,7 @@
                     maxResponseDelay: 3000
                 };
 
-            PingProvider.configure({
+            NgAutobahnPingProvider.configure({
                 delay: configuration.delay,
                 maxResponseDelay: configuration.maxResponseDelay
             });
@@ -655,13 +661,13 @@
                 '$rootScope',
                 'ngAutobahnConnection',
                 'ngAutobahnSession',
-                'Ping',
+                'NgAutobahnPing',
                 'NG_AUTOBAHN_CONNECTION_EVENTS',
                 function (
                     $rootScope,
                     ngAutobahnConnection,
                     ngAutobahnSession,
-                    Ping,
+                    NgAutobahnPing,
                     NG_AUTOBAHN_CONNECTION_EVENTS
                 ) {
 
@@ -669,7 +675,7 @@
 
                     function NgAutobahnConnectionPing() {
                         var self = this,
-                            _ping = new Ping(pingFn, errorFn);
+                            _ping = new NgAutobahnPing(pingFn, errorFn);
 
                         self.activate = function () {
                             $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _ping.start);
@@ -718,7 +724,7 @@
     /*****************************************************************************
      *
      * @ngdoc provider
-     * @name ping
+     * @name NgAutobahnPing
      * @module ngAutobahn.connection
      *
      * @description
@@ -727,7 +733,7 @@
      *
      *****************************************************************************/
 
-    .provider('Ping', [
+    .provider('NgAutobahnPing', [
 
         function () {
 
@@ -744,10 +750,10 @@
             self.$get = [
                 '$timeout',
                 '$interval',
-                function ($timeout, $interval) {
-                    return Ping;
+                function NgAutobahnPingFactory($timeout, $interval) {
+                    return NgAutobahnPing;
 
-                    function Ping(pingFn, errorFn) {
+                    function NgAutobahnPing(pingFn, errorFn) {
                         var self = this,
                             _timeout,
                             _interval;
