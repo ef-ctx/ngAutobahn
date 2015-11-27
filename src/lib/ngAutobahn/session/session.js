@@ -130,7 +130,7 @@
                 /****************************************************************
                  * REMOTE CALL
                  ***************************************************************/
-                function remoteCall(methodName, payload) {
+                function remoteCall(methodName, payload, triggerDigestCycle) {
                     var _defer = $q.defer(),
                         _payload = payload || {};
 
@@ -146,7 +146,13 @@
                     function invokeRemoteCall() {
                         _session.call(methodName, [], payload)
                             .then(_defer.resolve, _defer.reject)
-                            .finally($rootScope.$applyAsync);
+                            .finally(_triggerDigest);
+                    }
+
+                    function _triggerDigest() {
+                        if (triggerDigestCycle) {
+                            $rootScope.$applyAsync();
+                        }
                     }
                 }
 
