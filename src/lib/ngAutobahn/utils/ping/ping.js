@@ -15,7 +15,7 @@
     /*****************************************************************************
      *
      * @ngdoc provider
-     * @name ping
+     * @name NgAutobahnPing
      * @module ngAutobahn.connection
      *
      * @description
@@ -24,7 +24,7 @@
      *
      *****************************************************************************/
 
-    .provider('Ping', [
+    .provider('NgAutobahnPing', [
 
         function () {
 
@@ -41,10 +41,10 @@
             self.$get = [
                 '$timeout',
                 '$interval',
-                function ($timeout, $interval) {
-                    return Ping;
+                function NgAutobahnPingFactory($timeout, $interval) {
+                    return NgAutobahnPing;
 
-                    function Ping(pingFn, errorFn) {
+                    function NgAutobahnPing(pingFn, errorFn) {
                         var self = this,
                             _timeout,
                             _interval;

@@ -24,8 +24,8 @@
      **********************************************************/
 
     .provider('ngAutobahnConnectionPing', [
-        'PingProvider',
-        function (PingProvider) {
+        'NgAutobahnPingProvider',
+        function (NgAutobahnPingProvider) {
             var self = this,
                 configuration = {
                     pingMessage: 'ping',
@@ -33,7 +33,7 @@
                     maxResponseDelay: 3000
                 };
 
-            PingProvider.configure({
+            NgAutobahnPingProvider.configure({
                 delay: configuration.delay,
                 maxResponseDelay: configuration.maxResponseDelay
             });
@@ -47,13 +47,13 @@
                 '$rootScope',
                 'ngAutobahnConnection',
                 'ngAutobahnSession',
-                'Ping',
+                'NgAutobahnPing',
                 'NG_AUTOBAHN_CONNECTION_EVENTS',
                 function (
                     $rootScope,
                     ngAutobahnConnection,
                     ngAutobahnSession,
-                    Ping,
+                    NgAutobahnPing,
                     NG_AUTOBAHN_CONNECTION_EVENTS
                 ) {
 
@@ -61,7 +61,7 @@
 
                     function NgAutobahnConnectionPing() {
                         var self = this,
-                            _ping = new Ping(pingFn, errorFn);
+                            _ping = new NgAutobahnPing(pingFn, errorFn);
 
                         self.activate = function () {
                             $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _ping.start);

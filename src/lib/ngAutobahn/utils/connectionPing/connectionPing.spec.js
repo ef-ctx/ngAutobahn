@@ -1,5 +1,5 @@
 describe('ngAutobahnConnectionPing', function () {
-    /*'use strict';
+    'use strict';
 
     var connectionPingProvider,
         connectionPing,
@@ -11,19 +11,17 @@ describe('ngAutobahnConnectionPing', function () {
             maxResponseDelay: 42000
         };
 
-    beforeEach(function () {
-        module('ngAutobahn.utils.ping');
-        module('ngAutobahn.utils.connectionPing');
-    });
+    beforeEach(module('ngAutobahn.utils.connectionPing',
+        function (_ngAutobahnConnectionPingProvider_, _NgAutobahnPingProvider_) {
+            connectionPingProvider = _ngAutobahnConnectionPingProvider_;
+            pingProvider = _NgAutobahnPingProvider_;
+        }));
 
-    beforeEach(function () {
-        module('testModule', function (_connectionPingProvider_, _pingProvider_) {
-            connectionPingProvider = _connectionPingProvider_;
-            pingProvider = _pingProvider_;
-        });
+    beforeEach(inject(function () {
+        console.log('pingProvider spy', pingProvider);
 
         spyOn(pingProvider, 'configure').and.callThrough();
-    });
+    }));
 
     describe('configure', function () {
 
@@ -31,26 +29,6 @@ describe('ngAutobahnConnectionPing', function () {
 
         });
 
-        it('should invoke pingProvider.configure to configure the ping service', function () {
-            var expectedConfig = {
-                delay: 42,
-                maxResponseDelay: 42000
-            };
-
-            connectionPingProvider.configure(config);
-
-            expect(pingProvider).toHaveBeenCalled();
-            expect(pingProvider.calls.argsFor(0)).toEqual(expectedConfig);
-        });
-
     });
-
-    beforeEach(inject(function (_ngAutobahnConnectionPing_, _Ping_) {
-
-    }));
-
-    describe('should have a provider', function () {
-
-    });*/
 
 });
