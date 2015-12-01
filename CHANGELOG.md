@@ -1,3 +1,11 @@
+<a name="v0.0.5"></a>
+### v0.0.5 (2015-12-01)
+
+
+#### Features
+
+* **session:** avoid $q.resolve when performing a remote call. ([cb70b8b6](git@github.com:ef-ctx/ngAutobahn/commit/cb70b8b656021bad8862fc8ceeb8b10296647b98))
+
 <a name="v0.0.4"></a>
 ### v0.0.4 (2015-11-27)
 
