@@ -1,5 +1,5 @@
 /**
- * ngAutobahn - v0.0.2 - 2015-11-27
+ * ngAutobahn - v0.0.4 - 2015-12-01
  * https://github.com/ef-ctx/ngAutobahn
  *
  * Copyright (c) 2015 EF CTX <http://efclass.io>
@@ -514,30 +514,17 @@
                 /****************************************************************
                  * REMOTE CALL
                  ***************************************************************/
-                function remoteCall(methodName, payload, triggerDigestCycle) {
-                    var _defer = $q.defer(),
-                        _payload = payload || {};
+                function remoteCall(methodName, payload) {
+                    var _payload = payload || {};
 
-                    if (!_session) {
-                        ngAutobahnConnection.openConnection()
-                            .then(invokeRemoteCall);
-                    } else {
+                    return (!_session) ?
+                        ngAutobahnConnection.openConnection().then(invokeRemoteCall) :
                         invokeRemoteCall();
-                    }
-
-                    return _defer.promise;
 
                     function invokeRemoteCall() {
-                        _session.call(methodName, [], _payload)
-                            .then(_defer.resolve, _defer.reject)
-                            .finally(_triggerDigest);
+                        return _session.call(methodName, [], _payload);
                     }
 
-                    function _triggerDigest() {
-                        if (triggerDigestCycle) {
-                            $rootScope.$applyAsync();
-                        }
-                    }
                 }
 
                 /****************************************************************
