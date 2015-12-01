@@ -130,30 +130,17 @@
                 /****************************************************************
                  * REMOTE CALL
                  ***************************************************************/
-                function remoteCall(methodName, payload, triggerDigestCycle) {
-                    var _defer = $q.defer(),
-                        _payload = payload || {};
+                function remoteCall(methodName, payload) {
+                    var _payload = payload || {};
 
-                    if (!_session) {
-                        ngAutobahnConnection.openConnection()
-                            .then(invokeRemoteCall);
-                    } else {
+                    return (!_session) ?
+                        ngAutobahnConnection.openConnection().then(invokeRemoteCall) :
                         invokeRemoteCall();
-                    }
-
-                    return _defer.promise;
 
                     function invokeRemoteCall() {
-                        _session.call(methodName, [], _payload)
-                            .then(_defer.resolve, _defer.reject)
-                            .finally(_triggerDigest);
+                        return _session.call(methodName, [], _payload);
                     }
 
-                    function _triggerDigest() {
-                        if (triggerDigestCycle) {
-                            $rootScope.$applyAsync();
-                        }
-                    }
                 }
 
                 /****************************************************************

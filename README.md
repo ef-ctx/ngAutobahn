@@ -27,10 +27,9 @@ Provides a simple and easy way to interact with real time services using WAMP pr
     * Handles opening connection under the hood if the connection is not opened.
     * Opens the connection and when it is opened it performs the rpc.
     * Returns a promise which resolves in the function response.
-    * if applyTriggerFlag is true it will trugger a digest cycle after receiving the message.
 
     ```javascript
-    ngAutobahnSession.remoteCall('remoteMethodName', payload, applyTriggerFlag)
+    ngAutobahnSession.remoteCall('remoteMethodName', payload)
         .then(function (responsePayload) {
             console.log(responsePayload);
         });
