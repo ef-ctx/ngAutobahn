@@ -454,7 +454,6 @@ describe('ngAutobahnSession', function () {
             expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_channel1);
             expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_channel2);
 
-            /*
             ngAutobahnSession.end();
 
             ngAutobahnConnection.openConnection();
@@ -464,15 +463,7 @@ describe('ngAutobahnSession', function () {
             receiveMessageInChannel(_channel1);
             receiveMessageInChannel(_channel2);
 
-            console.log('_broker1',_broker1);
-
-            spyOn(_broker1,'messageReceivedHandler');
-            spyOn(_broker2,'messageReceivedHandler');
-
-            expect(handlers.messageReceived).toHaveBeenCalled();
-            expect(_broker1.messageReceivedHandler).not.toHaveBeenCalled();
-            expect(_broker2.messageReceivedHandler).not.toHaveBeenCalled();
-            */
+            expect(handlers.messageReceived.calls.count()).toBe(2);
         }));
 
         it('should unsubscribe all autobahn subscriptions from autobahn session', inject(function (ngAutobahnSession) {
