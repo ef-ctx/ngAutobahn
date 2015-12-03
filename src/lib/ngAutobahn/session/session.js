@@ -60,7 +60,7 @@
                         broker = createBroker(channel);
 
                     if (!channel) {
-                        throw new Error('ngAutobahn.session.subscribe error: Trying to subscribe withous specifying channel');
+                        throw new Error('ngAutobahn.session.subscribe error: Trying to subscribe without specifying channel');
                     }
 
                     if (!_session) {
@@ -68,7 +68,7 @@
                             .then(_setSession)
                             .finally(resolveBroker);
                     } else {
-                        subscribeBrokerToSessionChannel(broker, channel);
+                        _subscribeBrokerToSessionChannel(broker, channel);
                         resolveBroker();
                     }
 
@@ -94,7 +94,7 @@
                     return broker;
                 }
 
-                function subscribeBrokerToSessionChannel(broker, channel) {
+                function _subscribeBrokerToSessionChannel(broker, channel) {
                     var subscription = _session.subscribe(channel, broker.messageReceivedHandler)
                         .then(storeSubscription);
 
@@ -107,7 +107,7 @@
                     for (var channel in _brokers) {
                         var brokers = _brokers[channel];
                         for (var ix = 0; ix < brokers.length; ix++) {
-                            subscribeBrokerToSessionChannel(brokers[ix], channel);
+                            _subscribeBrokerToSessionChannel(brokers[ix], channel);
                         }
                     }
                 }
