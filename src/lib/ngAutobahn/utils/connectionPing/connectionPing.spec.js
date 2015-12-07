@@ -18,8 +18,6 @@ describe('ngAutobahnConnectionPing', function () {
         }));
 
     beforeEach(inject(function () {
-        console.log('pingProvider spy', pingProvider);
-
         spyOn(pingProvider, 'configure').and.callThrough();
     }));
 
