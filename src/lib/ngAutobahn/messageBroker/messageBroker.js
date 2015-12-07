@@ -37,9 +37,11 @@
                     facade: {
                         publish: publish,
                         subscribe: subscribe,
-                        getChannel: getChannel // legacy. This should NOT be exposed. See ln 21
+                        getChannel: getChannel // legacy. This should NOT be exposed. See ln 63
                     },
-                    messageReceivedHandler: messageReceivedHandler
+                    messageReceivedHandler: messageReceivedHandler,
+                    subscription: null,
+                    channel: _channel
                 };
 
                 /****************************************************************
@@ -82,9 +84,7 @@
                         messagePayload = payload.data;
 
                     if (hasHandlerForMessage(channelName, messageName)) {
-                        $rootScope.$applyAsync(function () {
-                            callHandlers(messageName, messagePayload);
-                        });
+                        callHandlers(messageName, messagePayload);
                     }
                 }
 

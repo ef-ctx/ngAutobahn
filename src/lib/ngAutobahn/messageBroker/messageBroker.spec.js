@@ -60,7 +60,6 @@ describe('NgAutobahnMessageBroker', function () {
                     channel: channel,
                     type: message
                 });
-                $timeout.flush();
                 expect(handlers.messageReceived).toHaveBeenCalled();
             }));
         });
