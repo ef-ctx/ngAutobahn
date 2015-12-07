@@ -236,7 +236,7 @@ module.exports = function (grunt, data) {
             build_test: {
                 browsers: [
                     'PhantomJS'
-                    // 'Chrome',
+                    //'Chrome',
                     // 'ChromeCanary',
                     // 'Firefox',
                     // 'Opera',

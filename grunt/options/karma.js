@@ -33,8 +33,8 @@ module.exports = function (grunt, data) {
 
                 // how to report, by default
                 reporters: [
-                    'dots',
-                    'coverage'
+                    'dots'
+                    //'coverage'
                 ],
 
                 coverageReporter: {
