@@ -1,3 +1,13 @@
+<a name="v0.0.6"></a>
+### v0.0.6 (2015-12-08)
+
+
+#### Bug Fixes
+
+* **session:**
+  * End session test. ([f2939145](git@github.com:ef-ctx/ngAutobahn/commit/f29391456537ba5638c965f7838ec2633334aa10))
+  * typo ([c681c364](git@github.com:ef-ctx/ngAutobahn/commit/c681c3647a3f7a3deae1b04f9d3e59fa08381266))
+
 <a name="v0.0.5"></a>
 ### v0.0.5 (2015-12-01)
 
