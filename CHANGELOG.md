@@ -1,3 +1,19 @@
+<a name="v0.0.7"></a>
+### v0.0.7 (2015-12-08)
+
+
+#### Features
+
+* **bower:** returned to 1.3.3 ([e281d1a9](git@github.com:ef-ctx/ngAutobahn/commit/e281d1a9b9981f32e8dc3d850859102c61a7c072))
+* **pingProvider:** log removed ([1c2f6eef](git@github.com:ef-ctx/ngAutobahn/commit/1c2f6eefb82ec56a48d35810e891bacb6d3fb1df))
+* **travis:**
+  * fix script ([4a20a1ca](git@github.com:ef-ctx/ngAutobahn/commit/4a20a1cadedf36d4fc25951d9f041b90467e4620))
+  * update scripts ([18c901e1](git@github.com:ef-ctx/ngAutobahn/commit/18c901e1132a7f7b6f7072d0f6eef472acf284ae))
+  * avoid system check ([f4a18ee4](git@github.com:ef-ctx/ngAutobahn/commit/f4a18ee4bda11073235c35829cc0edfe0927fc75))
+  * avoid bower update ([f40439cd](git@github.com:ef-ctx/ngAutobahn/commit/f40439cdb650949c82c9f75b09732d8b4545a66e))
+  * added bower cache clear ([1f3daf5c](git@github.com:ef-ctx/ngAutobahn/commit/1f3daf5cc1e08f4f520931b020cd73b82488d3fb))
+* **travis.sh:** clean npm ([219c5276](git@github.com:ef-ctx/ngAutobahn/commit/219c527659eef246f853c7cad660bf6cf2d894f5))
+
 <a name="v0.0.6"></a>
 ### v0.0.6 (2015-12-08)
 
