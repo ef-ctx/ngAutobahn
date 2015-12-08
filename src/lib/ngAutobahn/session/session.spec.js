@@ -10,7 +10,7 @@ describe('ngAutobahnSession', function () {
                 subscribe: function (channel, fn) {
                     var defer = $q.defer();
                     subscribeToChannel(channel, fn);
-                    defer.resolve({});
+                    defer.resolve(new Subscription(channel));
                     return defer.promise;
                 },
                 call: function () {
@@ -36,7 +36,33 @@ describe('ngAutobahnSession', function () {
             CLOSE: 'close'
         },
         ngAutobahnConnection = {},
-        isConnected = true;
+        isConnected = true,
+        subscriptions = 0,
+        _subscription_1 = {
+            broker: undefined,
+            channel: 'channel1',
+            message: {
+                name: 'messageForChannel1',
+                data: {
+                    foo: 'bar'
+                }
+            }
+        },
+        _subscription_2 = {
+            broker: undefined,
+            channel: 'channel2',
+            message: {
+                name: 'messageForChannel2',
+                data: {
+                    bar: 'baz'
+                }
+            }
+        };
+
+    function Subscription(channel) {
+        this.id = subscriptions++;
+        this.channel = channel;
+    }
 
     function subscribeToChannel(channel, handler) {
         if (!channelHandlers[channel]) {
@@ -68,24 +94,12 @@ describe('ngAutobahnSession', function () {
         $rootScope.$broadcast(connectionEvents.CLOSE, reason);
     }
 
-    function Broker(channel, _publish) {
-        this.messageReceivedHandler = function (p, payload) {
-            handlers.messageReceived(payload.channel, payload.type, payload.data);
-        };
-        this.facade = {
-            channel: channel,
-            publish: _publish,
-            subscribe: function () {}
-        };
-    }
-
     beforeEach(module('ngAutobahn.session'));
 
     beforeEach(function () {
         module(function ($provide) {
             $provide.constant('NG_AUTOBAHN_CONNECTION_EVENTS', connectionEvents);
             $provide.value('ngAutobahnConnection', ngAutobahnConnection);
-            $provide.value('NgAutobahnMessageBroker', Broker);
         });
     });
 
@@ -110,6 +124,7 @@ describe('ngAutobahnSession', function () {
                     notifyConnectionIsOpened(autobahn.session);
                 } else {
                     defer.reject();
+
                     notifyConnectionIsClosed();
                 }
             });
@@ -122,8 +137,8 @@ describe('ngAutobahnSession', function () {
 
             $timeout(function () {
                 channelHandlers = {};
-                defer.resolve();
                 notifyConnectionIsClosed();
+                defer.resolve();
             });
 
             return defer.promise;
@@ -156,13 +171,16 @@ describe('ngAutobahnSession', function () {
         spyOn(handlers, 'messageReceived').and.callThrough();
     });
 
+    afterEach(function () {
+        subscriptions = 1;
+    });
+
     describe('subscribe', function () {
         it('SHOULD be a function', inject(function (ngAutobahnSession) {
             expect(typeof ngAutobahnSession.subscribe).toBe('function');
         }));
 
         describe('WHEN subscribing', function () {
-
             describe('AND no channel is provided', function () {
                 it('SHOULD throw an error', inject(function (ngAutobahnSession) {
                     function foo() {
@@ -191,7 +209,7 @@ describe('ngAutobahnSession', function () {
                         });
                         $timeout.flush();
 
-                        expect(_broker.channel).toEqual(_channel);
+                        expect(_broker.getChannel()).toEqual(_channel);
                         expect(typeof _broker.subscribe).toBe('function');
                         expect(typeof _broker.publish).toBe('function');
                     }));
@@ -207,7 +225,7 @@ describe('ngAutobahnSession', function () {
                         isConnected = true;
                         $timeout.flush();
 
-                        expect(_broker.channel).toEqual(_channel);
+                        expect(_broker.getChannel()).toEqual(_channel);
                         expect(typeof _broker.subscribe).toBe('function');
                         expect(typeof _broker.publish).toBe('function');
                     }));
@@ -253,116 +271,127 @@ describe('ngAutobahnSession', function () {
                     expect(handlers.success).toHaveBeenCalled();
                 }));
             });
+
             describe('when there is NO connection', function () {
-                it('should reject the promise ', inject(function () {
+                it('should reject the promise ', inject(function (ngAutobahnSession) {
                     ngAutobahnConnection.closeConnection();
                     $timeout.flush();
+
                     _broker.publish(_channel, 'bar')
                         .then(handlers.success, handlers.error);
                     $timeout.flush();
                     expect(handlers.error).toHaveBeenCalled();
                 }));
             });
+
         });
+
         describe('ONCE subscribed', function () {
+
+            beforeEach(inject(function (ngAutobahnSession) {
+                ngAutobahnSession.subscribe(_subscription_1.channel).then(function (broker) {
+                    _subscription_1.broker = broker;
+                    _subscription_1.broker.subscribe(_subscription_1.message.name, handlers.messageReceived);
+                });
+                $timeout.flush();
+
+                ngAutobahnSession.subscribe(_subscription_2.channel).then(function (broker) {
+                    _subscription_2.broker = broker;
+                    _subscription_2.broker.subscribe(_subscription_2.message.name, handlers.messageReceived);
+                });
+                $timeout.flush();
+
+                receiveMessageInChannel(_subscription_1.channel, _subscription_1.message.name, _subscription_1.message.data);
+                receiveMessageInChannel(_subscription_2.channel, _subscription_2.message.name, _subscription_2.message.data);
+            }));
+
             describe('WHEN receiving a message', function () {
-                it('SHOULD invoke the brokers MESSAGE handler assigned to the channel', inject(function (ngAutobahnSession) {
-                    var _broker1,
-                        _broker2,
-                        _channel1 = 'foo',
-                        _channel2 = 'bar';
-
-                    ngAutobahnSession.subscribe(_channel1).then(function (broker) {
-                        _broker1 = broker;
-                    });
-
-                    $timeout.flush();
-                    ngAutobahnSession.subscribe(_channel2).then(function (broker) {
-                        _broker2 = broker;
-                    });
-
-                    $timeout.flush();
-                    receiveMessageInChannel(_channel1);
-                    receiveMessageInChannel(_channel2);
-
-                    expect(_broker1.channel).toBe(_channel1);
-                    expect(_broker2.channel).toBe(_channel2);
-
-                    expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_channel1);
-                    expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_channel2);
-                }));
+                it('SHOULD invoke the brokers MESSAGE handler assigned to the channel', function () {
+                    expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_subscription_1.message.data);
+                    expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_subscription_2.message.data);
+                });
             });
 
             describe('IF the connection is lost and regained again', function () {
                 describe('WHEN receiving a message', function () {
-                    it('SHOULD invoke the same brokers message handlers that was asigned at the beginning', inject(function (ngAutobahnSession) {
-                        var _broker1,
-                            _broker2,
-                            _channel1 = 'foo',
-                            _channel2 = 'bar';
-
-                        ngAutobahnSession.subscribe(_channel1).then(function (broker) {
-                            _broker1 = broker;
-                        });
-                        $timeout.flush();
-
-                        ngAutobahnSession.subscribe(_channel2).then(function (broker) {
-                            _broker2 = broker;
-                        });
-                        $timeout.flush();
-
-                        receiveMessageInChannel(_channel1);
-                        receiveMessageInChannel(_channel2);
-                        expect(_broker1.channel).toBe(_channel1);
-                        expect(_broker2.channel).toBe(_channel2);
-                        expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_channel1);
-                        expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_channel2);
-
+                    it('SHOULD invoke the same brokers message handlers that was asigned at the beginning', function () {
                         ngAutobahnConnection.closeAndRestablishConnection();
                         $timeout.flush();
 
-                        receiveMessageInChannel(_channel1);
-                        receiveMessageInChannel(_channel2);
-                        expect(handlers.messageReceived.calls.argsFor(2)[0]).toBe(_channel1);
-                        expect(handlers.messageReceived.calls.argsFor(3)[0]).toBe(_channel2);
-                    }));
-                });
+                        receiveMessageInChannel(_subscription_1.channel, _subscription_1.message.name, _subscription_1.message.data);
+                        receiveMessageInChannel(_subscription_2.channel, _subscription_2.message.name, _subscription_2.message.data);
 
-                describe('WHEN subscribing while theres no connection', function () {
-                    it('SHOULD store the handlers and subscribe them when reconnecting', inject(function (ngAutobahnSession) {
-                        var _broker1,
-                            _broker2,
-                            _channel1 = 'foo',
-                            _channel2 = 'bar';
-
-                        ngAutobahnSession.subscribe(_channel1).then(function (broker) {
-                            _broker1 = broker;
-                        });
-                        $timeout.flush();
-
-                        receiveMessageInChannel(_channel1);
-                        expect(_broker1.channel).toBe(_channel1);
-                        expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_channel1);
-
-                        ngAutobahnConnection.closeConnection();
-                        isConnected = false;
-
-                        ngAutobahnSession.subscribe(_channel2).then(function (broker) {
-                            _broker2 = broker;
-                        });
-                        $timeout.flush();
-
-                        isConnected = true;
-                        ngAutobahnConnection.openConnection();
-                        $timeout.flush();
-
-                        receiveMessageInChannel(_channel2);
-                        expect(_broker2.channel).toBe(_channel2);
-                        expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_channel2);
-                    }));
+                        expect(handlers.messageReceived.calls.argsFor(2)[0]).toBe(_subscription_1.message.data);
+                        expect(handlers.messageReceived.calls.argsFor(3)[0]).toBe(_subscription_2.message.data);
+                    });
                 });
             });
         });
+
+        describe('WHEN subscribing while theres no connection', function () {
+            it('SHOULD store the handlers and subscribe them when reconnecting', inject(function (ngAutobahnSession) {
+                ngAutobahnSession.subscribe(_subscription_1.channel).then(function (broker) {
+                    _subscription_1.broker = broker;
+                    _subscription_1.broker.subscribe(_subscription_1.message.name, handlers.messageReceived);
+                });
+                $timeout.flush();
+
+                receiveMessageInChannel(_subscription_1.channel, _subscription_1.message.name, _subscription_1.message.data);
+                expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_subscription_1.message.data);
+
+                ngAutobahnConnection.closeConnection();
+                isConnected = false;
+
+                ngAutobahnSession.subscribe(_subscription_2.channel).then(function (broker) {
+                    _subscription_2.broker = broker;
+                    _subscription_2.broker.subscribe(_subscription_2.message.name, handlers.messageReceived);
+                });
+                $timeout.flush();
+
+                isConnected = true;
+                ngAutobahnConnection.openConnection();
+                $timeout.flush();
+
+                receiveMessageInChannel(_subscription_2.channel, _subscription_2.message.name, _subscription_2.message.data);
+                expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_subscription_2.message.data);
+            }));
+        });
+    });
+
+    describe('unsubscribeBroker', function () {
+        var _session,
+            _broker,
+            _channel = 'foo';
+
+        beforeEach(inject(function (ngAutobahnSession) {
+            _session = ngAutobahnSession;
+            _session.subscribe(_channel).then(function (broker) {
+                _broker = broker;
+            });
+            $timeout.flush();
+        }));
+
+        it('SHOULD be a function', function () {
+            expect(typeof _session.unsubscribeBroker).toBe('function');
+        });
+
+        describe('IF a broker is provided', function () {
+            it('SHOULD invoke autobahn.session.unsubscribe with the broker´s subscription', function () {
+                _session.unsubscribeBroker(_broker);
+                expect(autobahn.session.unsubscribe.calls.argsFor(0)[0].id).toBe(1);
+            });
+        });
+
+        describe('if a broker is not provided', function () {
+            it('should throw an error', function () {
+                expect(callUnsubscribeBroker).toThrow();
+
+                function callUnsubscribeBroker() {
+                    _session.unsubscribeBroker();
+                }
+            });
+        });
+
     });
 
     describe('remoteCall', function () {
@@ -432,27 +461,22 @@ describe('ngAutobahnSession', function () {
         });
 
         it('should clean all handlers so that it is clean when subscribing to a new session', inject(function (ngAutobahnSession) {
-            var _broker1,
-                _broker2,
-                _channel1 = 'foo',
-                _channel2 = 'bar';
-
-            ngAutobahnSession.subscribe(_channel1).then(function (broker) {
-                _broker1 = broker;
+            ngAutobahnSession.subscribe(_subscription_1.channel).then(function (broker) {
+                _subscription_1.broker = broker;
+                _subscription_1.broker.subscribe(_subscription_1.message.name, handlers.messageReceived);
             });
             $timeout.flush();
 
-            ngAutobahnSession.subscribe(_channel2).then(function (broker) {
-                _broker2 = broker;
+            ngAutobahnSession.subscribe(_subscription_2.channel).then(function (broker) {
+                _subscription_2.broker = broker;
+                _subscription_2.broker.subscribe(_subscription_2.message.name, handlers.messageReceived);
             });
             $timeout.flush();
 
-            receiveMessageInChannel(_channel1);
-            receiveMessageInChannel(_channel2);
-            expect(_broker1.channel).toBe(_channel1);
-            expect(_broker2.channel).toBe(_channel2);
-            expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_channel1);
-            expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_channel2);
+            receiveMessageInChannel(_subscription_1.channel, _subscription_1.message.name, _subscription_1.message.data);
+            receiveMessageInChannel(_subscription_2.channel, _subscription_2.message.name, _subscription_2.message.data);
+            expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_subscription_1.message.data);
+            expect(handlers.messageReceived.calls.argsFor(1)[0]).toBe(_subscription_2.message.data);
 
             ngAutobahnSession.end();
 
@@ -460,19 +484,15 @@ describe('ngAutobahnSession', function () {
 
             $timeout.flush();
 
-            receiveMessageInChannel(_channel1);
-            receiveMessageInChannel(_channel2);
+            receiveMessageInChannel(_subscription_1.channel, _subscription_1.message.name, _subscription_1.message.data);
+            receiveMessageInChannel(_subscription_2.channel, _subscription_2.message.name, _subscription_2.message.data);
 
             expect(handlers.messageReceived.calls.count()).toBe(2);
+
         }));
 
         it('should unsubscribe all autobahn subscriptions from autobahn session', inject(function (ngAutobahnSession) {
-            var _broker1,
-                _channel1 = 'foo';
-
-            ngAutobahnSession.subscribe(_channel1).then(function (broker) {
-                _broker1 = broker;
-            });
+            ngAutobahnSession.subscribe(_subscription_1.channel);
             $timeout.flush();
 
             ngAutobahnSession.end();
@@ -486,10 +506,6 @@ describe('ngAutobahnSession', function () {
             ngAutobahnSession.end();
             $timeout.flush();
             expect(ngAutobahnConnection.closeConnection).toHaveBeenCalled();
-        }));
-
-        it('should invoke end on all brokers', inject(function (ngAutobahnSession) {
-
         }));
 
     });

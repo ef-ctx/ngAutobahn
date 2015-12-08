@@ -41,12 +41,12 @@
             function NgAutobahnSession() {
                 var self = this,
                     _session,
-                    _subscriptions = [],
                     _brokers = {};
 
                 this.subscribe = subscribe;
                 this.remoteCall = remoteCall;
                 this.end = end;
+                this.unsubscribeBroker = unsubscribeBroker;
 
                 $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
                 $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, connectionClosedHandler);
@@ -57,7 +57,7 @@
                  ***************************************************************/
                 function subscribe(channel) {
                     var defer = $q.defer(),
-                        broker = createBroker(channel);
+                        broker = new NgAutobahnMessageBroker(channel, publish);
 
                     if (!channel) {
                         throw new Error('ngAutobahn.session.subscribe error: Trying to subscribe without specifying channel');
@@ -68,13 +68,13 @@
                             .then(_setSession)
                             .finally(resolveBroker);
                     } else {
-                        _subscribeBrokerToSessionChannel(broker, channel);
                         resolveBroker();
                     }
 
                     return defer.promise;
 
                     function resolveBroker() {
+                        _subscribeBroker(broker);
                         defer.resolve(broker.facade);
                     }
                 }
@@ -83,32 +83,34 @@
                     _session = session;
                 }
 
-                function createBroker(channel) {
-                    var broker = new NgAutobahnMessageBroker(channel, publish);
+                function _subscribeBroker(broker) {
+                    _session.subscribe(broker.channel, broker.messageReceivedHandler)
+                        .then(linkSubscriptionToBroker);
 
-                    if (!_brokers[channel]) {
-                        _brokers[channel] = [];
-                    }
-                    _brokers[channel].push(broker);
-
-                    return broker;
-                }
-
-                function _subscribeBrokerToSessionChannel(broker, channel) {
-                    var subscription = _session.subscribe(channel, broker.messageReceivedHandler)
-                        .then(storeSubscription);
-
-                    function storeSubscription(subscription) {
-                        _subscriptions.push(subscription);
+                    function linkSubscriptionToBroker(subscription) {
+                        broker.subscription = subscription;
+                        _brokers[subscription.id] = broker;
                     }
                 }
 
                 function subscribeHandlers() {
-                    for (var channel in _brokers) {
-                        var brokers = _brokers[channel];
-                        for (var ix = 0; ix < brokers.length; ix++) {
-                            _subscribeBrokerToSessionChannel(brokers[ix], channel);
-                        }
+                    for (var brokerId in _brokers) {
+                        var broker = _brokers[brokerId];
+                        _subscribeBroker(broker);
+                    }
+                }
+
+                /****************************************************************
+                 * SUBSCRIBE
+                 ***************************************************************/
+
+                function unsubscribeBroker(brokerFacade) {
+                    if (!brokerFacade) {
+                        throw new Error('ngAutobahnSession.unsubscribeBroker error. No broker provided');
+                    } else {
+                        var broker = _getBrokerByBrokerFacade(brokerFacade);
+                        _unsubscribeBroker(broker);
+                        delete _brokers[broker.subscription.id];
                     }
                 }
 
@@ -123,8 +125,8 @@
                 }
 
                 function connectionClosedHandler(evt, reason) {
+                    _unsubscribeAllBrokers();
                     _session = null;
-                    _subscriptions = [];
                 }
 
                 /****************************************************************
@@ -187,9 +189,9 @@
                 function _destroy() {
                     var defer = $q.defer();
 
-                    _cleanAllSubscriptions();
+                    _unsubscribeAllBrokers();
 
-                    cleanAllBrokers();
+                    _cleanAllBrokers();
 
                     ngAutobahnConnection.closeConnection()
                         .then(defer.resolve, defer.reject);
@@ -197,15 +199,35 @@
                     return defer.promise;
                 }
 
-                function _cleanAllSubscriptions() {
-                    if (_subscriptions.length > 0) {
-                        _session.unsubscribe(_subscriptions.pop());
-                        return _cleanAllSubscriptions();
+                /****************************************************************
+                 * HELPERS
+                 ***************************************************************/
+
+                function _unsubscribeBroker(broker) {
+                    _session.unsubscribe(broker.subscription);
+                }
+
+                function _unsubscribeAllBrokers() {
+                    for (var brokerId in _brokers) {
+                        _unsubscribeBroker(_brokers[brokerId]);
                     }
                 }
 
-                function cleanAllBrokers() {
-                    _brokers = [];
+                function _cleanAllBrokers() {
+                    _brokers = {};
+                }
+
+                function _getBrokerByBrokerFacade(brokerFacade) {
+                    var broker;
+
+                    for (var brokerId in _brokers) {
+                        broker = _brokers[brokerId];
+                        if (brokerFacade === broker.facade) {
+                            return broker;
+                        }
+                    }
+
+                    return null;
                 }
             }
         }
