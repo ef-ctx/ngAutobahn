@@ -23,7 +23,11 @@ describe('ngAutobahnSession', function () {
                     defer.resolve();
                     return defer.promise;
                 },
-                unsubscribe: function () {}
+                unsubscribe: function () {
+                    var defer = $q.defer();
+                    defer.resolve();
+                    return defer.promise;
+                }
             }
         },
         handlers = {
@@ -370,10 +374,6 @@ describe('ngAutobahnSession', function () {
             });
             $timeout.flush();
         }));
-
-        it('SHOULD be a function', function () {
-            expect(typeof _session.unsubscribeBroker).toBe('function');
-        });
 
         describe('IF a broker is provided', function () {
             it('SHOULD invoke autobahn.session.unsubscribe with the broker´s subscription', function () {

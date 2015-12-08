@@ -490,12 +490,15 @@
                  ***************************************************************/
 
                 function unsubscribeBroker(brokerFacade) {
+                    var broker;
+
                     if (!brokerFacade) {
                         throw new Error('ngAutobahnSession.unsubscribeBroker error. No broker provided');
                     } else {
-                        var broker = _getBrokerByBrokerFacade(brokerFacade);
-                        _unsubscribeBroker(broker);
-                        delete _brokers[broker.subscription.id];
+                        broker = _getBrokerByBrokerFacade(brokerFacade);
+
+                        return _unsubscribeBroker(broker)
+                            .then(_deleteBroker);
                     }
                 }
 
@@ -588,8 +591,22 @@
                  * HELPERS
                  ***************************************************************/
 
+                function _deleteBroker(broker) {
+                    delete _brokers[broker.subscription.id];
+                }
+
                 function _unsubscribeBroker(broker) {
-                    _session.unsubscribe(broker.subscription);
+                    var defer = $q.defer();
+
+                    _session.unsubscribe(broker.subscription)
+                        .then(_resolveBroker, defer.reject);
+
+                    return defer.promise;
+
+                    function _resolveBroker() {
+                        defer.resolve(broker);
+                    }
+
                 }
 
                 function _unsubscribeAllBrokers() {
