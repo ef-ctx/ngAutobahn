@@ -12,4 +12,5 @@ then
 fi
 
 # ci tasks
+bower cache clean
 bower update && grunt ci
