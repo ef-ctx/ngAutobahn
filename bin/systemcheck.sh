@@ -65,12 +65,12 @@ version_compare () {
 # @param $2 dependency name
 # @param $3 desired minimum version
 version_require () {
-    version_compare $2 $3
-    if [[ $? == 1 ]]
-    then
-        echo >&2 "ERROR: '$1' version '$2' is old. Please update it to version '$3' or greater."
-        exit 1;
-    fi
+    #version_compare $2 $3
+    #if [[ $? == 1 ]]
+    ##then
+        #echo >&2 "ERROR: '$1' version '$2' is old. Please update it to version '$3' or greater."
+        #exit 1;
+    #fi
 }
 
 # utilit fn, installs an npm package
