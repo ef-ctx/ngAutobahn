@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # install global dependencies
+npm cache clear && rm -rf node_modules && npm install
 npm install -g grunt-cli bower
 
 # checks node, npm, bower & grunt-cli version
