@@ -1,5 +1,5 @@
 /**
- * ngAutobahn - v0.0.5 - 2015-12-08
+ * ngAutobahn - v0.0.6 - 2015-12-08
  * https://github.com/ef-ctx/ngAutobahn
  *
  * Copyright (c) 2015 EF CTX <http://efclass.io>
