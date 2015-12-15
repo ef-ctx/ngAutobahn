@@ -1,5 +1,5 @@
 /**
- * ngAutobahn - v0.0.7 - 2015-12-08
+ * ngAutobahn - v0.0.7 - 2015-12-15
  * https://github.com/ef-ctx/ngAutobahn
  *
  * Copyright (c) 2015 EF CTX <http://efclass.io>
@@ -435,7 +435,7 @@
 
                 $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
                 $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, connectionClosedHandler);
-                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionClosedHandler);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionLostHandler);
 
                 /****************************************************************
                  * SUBSCRIBE
@@ -478,7 +478,7 @@
                     }
                 }
 
-                function subscribeHandlers() {
+                function _subscribeHandlers() {
                     for (var brokerId in _brokers) {
                         var broker = _brokers[brokerId];
                         _subscribeBroker(broker);
@@ -507,13 +507,17 @@
                  ***************************************************************/
                 function connectionOpenedHandler(evt, session) {
                     if (!_session) {
-                        _session = session;
-                        subscribeHandlers();
+                        _setSession(session);
+                        _subscribeHandlers();
                     }
                 }
 
                 function connectionClosedHandler(evt, reason) {
                     _unsubscribeAllBrokers();
+                    _session = null;
+                }
+
+                function connectionLostHandler(evt, reason) {
                     _session = null;
                 }
 
@@ -778,42 +782,48 @@
                 '$timeout',
                 '$interval',
                 function NgAutobahnPingFactory($timeout, $interval) {
+
                     return NgAutobahnPing;
 
                     function NgAutobahnPing(pingFn, errorFn) {
-                        var self = this,
-                            _timeout,
+                        var _isPingPromiseResolved = true,
                             _interval;
 
-                        self.start = start;
-                        self.stop = stop;
+                        this.start = start;
+                        this.stop = stop;
 
                         function start() {
-                            stop();
-                            sendPingMessage();
-                            _interval = $interval(sendPingMessage, config.delay, 0, false);
+                            _interval = $interval(_intervalHandler, config.maxResponseDelay, 0, false);
+                        }
+
+                        function _intervalHandler() {
+                            if (_isPingPromiseResolved) {
+                                _invokePingFn();
+                            } else {
+                                _clearInterval();
+                                _invokeErrorFn();
+                            }
                         }
 
                         function stop() {
-                            clearTimeout();
-                            clearInterval();
+                            _clearInterval();
+                            _isPingPromiseResolved = true;
                         }
 
-                        function sendPingMessage() {
-                            _timeout = $timeout(_maxResponseDelayReachedHandler, config.maxResponseDelay);
-                            pingFn().then(clearTimeout);
+                        function _invokePingFn() {
+                            _isPingPromiseResolved = false;
+                            pingFn().then(_pingFunctionResolvedHandler);
                         }
 
-                        function _maxResponseDelayReachedHandler() {
-                            stop();
+                        function _invokeErrorFn() {
                             errorFn();
                         }
 
-                        function clearTimeout() {
-                            $timeout.cancel(_timeout);
+                        function _pingFunctionResolvedHandler() {
+                            _isPingPromiseResolved = true;
                         }
 
-                        function clearInterval() {
+                        function _clearInterval() {
                             $interval.cancel(_interval);
                         }
                     }
