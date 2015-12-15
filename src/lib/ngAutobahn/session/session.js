@@ -81,7 +81,6 @@
 
                 function _setSession(session) {
                     _session = session;
-                    window.ngAutobahn.currentSession = session;
                 }
 
                 function _subscribeBroker(broker) {
