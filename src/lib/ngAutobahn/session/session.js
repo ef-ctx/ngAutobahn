@@ -50,7 +50,7 @@
 
                 $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, connectionOpenedHandler);
                 $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, connectionClosedHandler);
-                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionClosedHandler);
+                $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, connectionLostHandler);
 
                 /****************************************************************
                  * SUBSCRIBE
@@ -81,6 +81,7 @@
 
                 function _setSession(session) {
                     _session = session;
+                    window.ngAutobahn.currentSession = session;
                 }
 
                 function _subscribeBroker(broker) {
@@ -93,7 +94,7 @@
                     }
                 }
 
-                function subscribeHandlers() {
+                function _subscribeHandlers() {
                     for (var brokerId in _brokers) {
                         var broker = _brokers[brokerId];
                         _subscribeBroker(broker);
@@ -122,13 +123,17 @@
                  ***************************************************************/
                 function connectionOpenedHandler(evt, session) {
                     if (!_session) {
-                        _session = session;
-                        subscribeHandlers();
+                        _setSession(session);
+                        _subscribeHandlers();
                     }
                 }
 
                 function connectionClosedHandler(evt, reason) {
                     _unsubscribeAllBrokers();
+                    _session = null;
+                }
+
+                function connectionLostHandler(evt, reason) {
                     _session = null;
                 }
 
