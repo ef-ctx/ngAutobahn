@@ -1,3 +1,14 @@
+<a name="v0.0.8"></a>
+### v0.0.8 (2015-12-15)
+
+
+#### Features
+
+* **ping:** removed timer ([a2179c70](git@github.com:ef-ctx/ngAutobahn/commit/a2179c70b5b874480e26d649d44f709800c96970))
+* **session:**
+  * handling lost and close separately. ([bd45f029](git@github.com:ef-ctx/ngAutobahn/commit/bd45f0295ad7d69ad1fcd94f57aa2eee57e549c6))
+  * unsubscribe returns a promise ([c8e702b6](git@github.com:ef-ctx/ngAutobahn/commit/c8e702b6ba2cbf1acadbf1f2ad54bc6320f8e94e))
+
 <a name="v0.0.7"></a>
 ### v0.0.7 (2015-12-08)
 
