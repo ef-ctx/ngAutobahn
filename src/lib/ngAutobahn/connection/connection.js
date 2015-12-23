@@ -53,6 +53,7 @@
      *****************************************************************************/
 
     .provider('ngAutobahnConnection', [
+
         function ngAutobahnConnectionProvider() {
             /**
              * @type {Object} provider configuration used in service/factory below
@@ -157,22 +158,24 @@
                                 _connectionOpenedHandler();
                             } else {
                                 _connection = new autobahn.Connection(autobahnOptions);
-
-                                _connection.onopen = function (session) {
-                                    _session = session;
-                                    defer.resolve(session);
-                                    _connectionOpenedHandler();
-                                };
-
-                                _connection.onclose = function (reason) {
-                                    defer.reject();
-                                    _connectionLostHandler();
-                                };
-
+                                _connection.onopen = onOpen;
+                                _connection.onclose = onErrorOpening;
                                 _connection.open();
                             }
 
                             return defer.promise;
+
+                            function onOpen(session) {
+                                _session = session;
+                                defer.resolve(session);
+                                _connectionOpenedHandler();
+                            }
+
+                            function onErrorOpening() {
+                                _connection.onclose = null;
+                                defer.reject();
+                                _connectionLostHandler();
+                            }
                         }
 
                         /****************************************************************
@@ -180,6 +183,7 @@
                          ***************************************************************/
 
                         function closeConnection() {
+
                             return _closeConnection()
                                 .then(_connectionClosedHandler);
                         }
@@ -188,16 +192,19 @@
                             var defer = $q.defer();
 
                             if (_connection) {
-                                _connection.onclose = function (reason) {
-                                    _connection = null;
-                                    defer.resolve();
-                                };
+                                _connection.onclose = connectionCloseHandler;
                                 _connection.close();
                             } else {
                                 defer.reject();
                             }
 
                             return defer.promise;
+
+                            function connectionCloseHandler(reason) {
+                                _connection.onclose = null;
+                                _connection = null;
+                                defer.resolve();
+                            }
                         }
 
                         /****************************************************************
@@ -205,6 +212,7 @@
                          ***************************************************************/
 
                         function resetConnection() {
+
                             _connectionLostHandler();
 
                             _closeConnection()
@@ -229,9 +237,11 @@
                             _status = NG_AUTOBAHN_CONNECTION_STATUS.OPENED;
                             notifyConnectionIsOpened();
                         }
+
                         /****************************************************************
                          * NOTIFIERS
                          ***************************************************************/
+
                         function notifyConnectionIsOpened() {
                             $rootScope.$broadcast(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _session);
                         }
