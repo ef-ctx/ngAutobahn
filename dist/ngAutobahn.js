@@ -1,10 +1,10 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.10
+ * ngAutobahn - v0.0.15
  * 
- * Release date : 2015-12-23 : 12:03
- * Author       : [object Object] 
- * License      :  
+ * Release date : 2015-12-23 : 13:49
+ * Author       : Jaime Beneytez - EF CTX 
+ * License      : MIT 
  * 
  **********************************************************/
 

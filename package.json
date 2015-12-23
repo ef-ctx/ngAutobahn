@@ -1,17 +1,15 @@
 {
   "name": "ngAutobahn",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "angular modules for autobahn real time services over WAMP web socket protocol ",
   "author": {
-    "name": "EF CTX",
+    "name": "Jaime Beneytez - EF CTX",
     "url":  "http://efclass.io"
   },
-  "licenses": [
-    {
+  "license":{
       "type": "MIT",
       "url": "https://raw.githubusercontent.com/EFEducationFirstMobile/oss/master/LICENSE"
-    }
-  ],
+  },
   "keywords": [
     "angularjs"
   ],
