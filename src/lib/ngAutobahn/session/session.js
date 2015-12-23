@@ -56,64 +56,40 @@
                  * SUBSCRIBE
                  ***************************************************************/
                 function subscribe(channel) {
-                    var defer = $q.defer(),
-                        broker = new NgAutobahnMessageBroker(channel, publish);
+                    var defer = $q.defer();
 
                     if (!channel) {
                         throw new Error('ngAutobahn.session.subscribe error: Trying to subscribe without specifying channel');
                     }
 
-                    if (!_session) {
-                        ngAutobahnConnection.openConnection()
-                            .then(_setSession)
-                            .finally(resolveBroker);
-                    } else {
+                    if (_session) {
                         resolveBroker();
+                    } else {
+                        _openSession().then(resolveBroker, handleError);
                     }
 
                     return defer.promise;
 
                     function resolveBroker() {
-                        _subscribeBroker(broker);
-                        defer.resolve(broker.facade);
+                        defer.resolve(_createBroker(channel));
+                    }
+
+                    function handleError(error) {
+                        defer.reject('ngAutobahnSession.subscribe Error: ', error);
                     }
                 }
 
-                function _setSession(session) {
-                    _session = session;
-                }
+                function _createBroker(channel) {
+                    var broker = new NgAutobahnMessageBroker(channel, publish);
 
-                function _subscribeBroker(broker) {
-                    _session.subscribe(broker.channel, broker.messageReceivedHandler)
-                        .then(linkSubscriptionToBroker);
+                    _subscribeBroker(broker)
+                        .then(storeBroker);
 
-                    function linkSubscriptionToBroker(subscription) {
+                    return broker.facade;
+
+                    function storeBroker(subscription) {
                         broker.subscription = subscription;
                         _brokers[subscription.id] = broker;
-                    }
-                }
-
-                function _subscribeHandlers() {
-                    for (var brokerId in _brokers) {
-                        var broker = _brokers[brokerId];
-                        _subscribeBroker(broker);
-                    }
-                }
-
-                /****************************************************************
-                 * SUBSCRIBE
-                 ***************************************************************/
-
-                function unsubscribeBroker(brokerFacade) {
-                    var broker;
-
-                    if (!brokerFacade) {
-                        throw new Error('ngAutobahnSession.unsubscribeBroker error. No broker provided');
-                    } else {
-                        broker = _getBrokerByBrokerFacade(brokerFacade);
-
-                        return _unsubscribeBroker(broker)
-                            .then(_deleteBroker);
                     }
                 }
 
@@ -123,31 +99,28 @@
                 function connectionOpenedHandler(evt, session) {
                     if (!_session) {
                         _setSession(session);
-                        _subscribeHandlers();
+                        _subscribeBrokerHandlers();
                     }
                 }
 
                 function connectionClosedHandler(evt, reason) {
                     _unsubscribeAllBrokers();
-                    _session = null;
+                    _cleanSession();
                 }
 
                 function connectionLostHandler(evt, reason) {
-                    _session = null;
+                    _cleanSession();
                 }
 
                 /****************************************************************
                  * REMOTE CALL
                  ***************************************************************/
                 function remoteCall(methodName, payload) {
-                    var _payload = payload || {};
 
-                    return (!_session) ?
-                        ngAutobahnConnection.openConnection().then(invokeRemoteCall) :
-                        invokeRemoteCall();
+                    return (_session) ? invokeRemoteCall() : _openSession().then(invokeRemoteCall);
 
                     function invokeRemoteCall() {
-                        return _session.call(methodName, [], _payload);
+                        return _session.call(methodName, [], payload || {});
                     }
 
                 }
@@ -155,6 +128,7 @@
                 /****************************************************************
                  * PUBLISH
                  ***************************************************************/
+
                 function publish(channel, message, payload) {
                     var _defer = $q.defer(),
                         _payload, _options;
@@ -165,9 +139,8 @@
                             acknowledge: true
                         };
 
-                        _session.publish(channel, [], formatPublishPayload(message, payload), _options)
-                            .then(_defer.resolve, _defer.reject)
-                            .finally($rootScope.$applyAsync);
+                        _session.publish(channel, [], _payload, _options)
+                            .then(_defer.resolve, _defer.reject);
                     } else {
                         _defer.reject('ngAutobahnConnection error no session was established');
                     }
@@ -210,6 +183,32 @@
                  * HELPERS
                  ***************************************************************/
 
+                function _cleanSession() {
+                    _session = null;
+                }
+
+                function _openSession() {
+                    return ngAutobahnConnection.openConnection()
+                        .then(_setSession);
+                }
+
+                function _setSession(session) {
+                    _session = session;
+                }
+
+                /****************************************************************
+                 * BROKER HELPERS
+                 ***************************************************************/
+
+                function unsubscribeBroker(brokerFacade) {
+                    if (!brokerFacade) {
+                        throw new Error('ngAutobahnSession.unsubscribeBroker error. No broker provided');
+                    } else {
+                        return _unsubscribeBroker(_getBrokerByBrokerFacade(brokerFacade))
+                            .then(_deleteBroker);
+                    }
+                }
+
                 function _deleteBroker(broker) {
                     delete _brokers[broker.subscription.id];
                 }
@@ -250,7 +249,20 @@
 
                     return null;
                 }
+
+                function _subscribeBroker(broker) {
+                    return _session.subscribe(broker.channel, broker.messageReceivedHandler);
+                }
+
+                function _subscribeBrokerHandlers() {
+                    for (var brokerId in _brokers) {
+                        var broker = _brokers[brokerId];
+                        _subscribeBroker(broker);
+                    }
+                }
+
             }
+
         }
     ]);
 
