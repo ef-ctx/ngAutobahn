@@ -35,8 +35,8 @@ module.exports = {
             '\n * <%= pkg.name %> - v<%= pkg.version %>' +
             '\n * ' +
             '\n * Release date : <%= grunt.template.today("yyyy-mm-dd : HH:MM") %>' +
-            '\n * Author       : <%= pkg.author %> ' +
-            '\n * License      : <%= pkg.license %> ' +
+            '\n * Author       : <%= pkg.author.name %> ' +
+            '\n * License      : <%= pkg.license.type %> ' +
             '\n * ' +
             '\n **********************************************************/' +
             '\n\n\n\n'
