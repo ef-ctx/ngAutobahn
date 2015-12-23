@@ -7,6 +7,7 @@ describe('ngAutobahnSession', function () {
         channelHandlers = {},
         autobahn = {
             session: {
+                isOpen: true,
                 subscribe: function (channel, fn) {
                     var defer = $q.defer();
                     subscribeToChannel(channel, fn);
