@@ -27,6 +27,7 @@
         "expect": true,
         "spyOn": true,
         "require": true,
-        "process": true
+        "process": true,
+        "autobahn": true
     }
 }
