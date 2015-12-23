@@ -1,9 +1,7 @@
 # ngAutobahn
-angular modules for autobahn real time services over WAMP web socket protocol.
-
-# ngAutobahn
 [![Build Status: Linux](http://img.shields.io/travis/ef-ctx/ngAutobahn/master.svg?style=flat-square)](https://travis-ci.org/ef-ctx/ngAutobahn)
 [![Bower version](http://img.shields.io/bower/v/ngAutobahn.svg?style=flat-square)](git@github.com:ef-ctx/ngAutobahn.git)
+angular modules for autobahn real time services over WAMP web socket protocol.
 
 > ###DESCRIPTION###
 
@@ -137,14 +135,13 @@ Make sure you read the [Contributing Guide](CONTRIBUTING.md) first.
 
 ## Developing
 
-Clone this repository, install the dependencies and simply run `grunt develop`.
+Clone this repository, install the dependencies and simply run `grunt`.
 
 ```
 $ npm install -g grunt-cli bower
 $ npm install
 $ bower install
-$ ./bootstrap.sh
-$ grunt develop
+$ grunt
 ```
 
 At this point, the source examples included were built into the `build/` directory and a simple webserver is launched so
