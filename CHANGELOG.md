@@ -1,3 +1,13 @@
+<a name="0.0.17"></a>
+## [0.0.17](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.16...v0.0.17) (2015-12-23)
+
+
+### Bug Fixes
+
+* **ping:** Cancels the previous interval when starting a new one. ([adb8bfa](https://github.com/ef-ctx/ngAutobahn/commit/adb8bfa))
+
+
+
 <a name="0.0.16"></a>
 ## [0.0.16](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.15...v0.0.16) (2015-12-23)
 

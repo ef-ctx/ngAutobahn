@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.16
+ * ngAutobahn - v0.0.17
  * 
- * Release date : 2015-12-23 : 15:16
+ * Release date : 2015-12-23 : 18:39
  * Author       : Jaime Beneytez - EF CTX 
  * License      : MIT 
  * 
@@ -827,6 +827,9 @@
                         this.stop = stop;
 
                         function start() {
+                            if(_interval){
+                                _clearInterval();
+                            }
                             _interval = $interval(_intervalHandler, config.maxResponseDelay, 0, false);
                         }
 
@@ -859,6 +862,7 @@
 
                         function _clearInterval() {
                             $interval.cancel(_interval);
+                            _interval = null;
                         }
                     }
                 }
