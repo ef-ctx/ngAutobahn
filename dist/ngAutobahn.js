@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.9
+ * ngAutobahn - v0.0.10
  * 
- * Release date : 2015-12-23 : 12:00
+ * Release date : 2015-12-23 : 12:03
  * Author       : [object Object] 
  * License      :  
  * 
@@ -489,7 +489,6 @@
                     return (_session) ? invokeRemoteCall() : _openSession().then(invokeRemoteCall);
 
                     function invokeRemoteCall() {
-                        console.log('INVOKE REMOTE CALL', methodName, _session.isOpen);
                         return (_session.isOpen) ? _session.call(methodName, [], payload || {}): $q.reject('session is not open');
                     }
 

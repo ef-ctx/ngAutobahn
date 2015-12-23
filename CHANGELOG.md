@@ -1,3 +1,13 @@
+<a name="0.0.10"></a>
+## [0.0.10](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.9...v0.0.10) (2015-12-23)
+
+
+### Bug Fixes
+
+* **session:** log removed. ([ff0c9a8](https://github.com/ef-ctx/ngAutobahn/commit/ff0c9a8))
+
+
+
 <a name="0.0.9"></a>
 ## [0.0.9](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.8...v0.0.9) (2015-12-23)
 
