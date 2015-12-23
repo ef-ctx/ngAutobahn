@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.15
+ * ngAutobahn - v0.0.16
  * 
- * Release date : 2015-12-23 : 13:49
+ * Release date : 2015-12-23 : 15:16
  * Author       : Jaime Beneytez - EF CTX 
  * License      : MIT 
  * 
@@ -441,7 +441,7 @@
             function NgAutobahnSession() {
                 var self = this,
                     _session,
-                    _brokers = {};
+                    _brokers = [];
 
                 this.subscribe = subscribe;
                 this.remoteCall = remoteCall;
@@ -600,20 +600,19 @@
 
                     return broker.facade;
 
-                    function storeBroker(subscription) {
-                        broker.subscription = subscription;
-                        _brokers[subscription.id] = broker;
+                    function storeBroker(broker) {
+                        _brokers.push(broker);
                     }
                 }
 
                 // delete --------------------------------------------------
 
                 function _deleteBroker(broker) {
-                    delete _brokers[broker.subscription.id];
+                    return _brokers.splice(_brokers.indexOf(broker), 1);
                 }
 
                 function _cleanAllBrokers() {
-                    _brokers = {};
+                    _brokers = [];
                 }
 
                 // retrieve --------------------------------------------------
@@ -621,9 +620,9 @@
                 function _getBrokerByBrokerFacade(brokerFacade) {
                     var broker;
 
-                    for (var brokerId in _brokers) {
-                        broker = _brokers[brokerId];
-                        if (brokerFacade === broker.facade) {
+                    for (var ix = 0; ix < _brokers.length; ix++) {
+                        broker = _brokers[ix];
+                        if (broker.facade === brokerFacade) {
                             return broker;
                         }
                     }
@@ -634,14 +633,22 @@
                 // subscribe --------------------------------------------------
 
                 function _subscribeBroker(broker) {
-                    return _session.subscribe(broker.channel, broker.messageReceivedHandler);
+
+                    return _session.subscribe(broker.channel, broker.messageReceivedHandler)
+                        .then(assignSubscription)
+                        .catch($q.reject);
+
+                    function assignSubscription(subscription) {
+                        broker.subscription = subscription;
+                        return broker;
+                    }
+
                 }
 
                 function _resubscribeBrokers() {
-                    for (var brokerId in _brokers) {
-                        _subscribeBroker(_brokers[brokerId]);
-                    }
+                    _brokers.forEach(_subscribeBroker);
                 }
+
 
                 // unsubscribe --------------------------------------------------
 
@@ -659,9 +666,7 @@
                 }
 
                 function _unsubscribeAllBrokers() {
-                    for (var brokerId in _brokers) {
-                        _unsubscribeBroker(_brokers[brokerId]);
-                    }
+                    _brokers.forEach(_unsubscribeBroker);
                 }
 
             }

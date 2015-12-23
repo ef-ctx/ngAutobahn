@@ -1,3 +1,13 @@
+<a name="0.0.16"></a>
+## [0.0.16](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.15...v0.0.16) (2015-12-23)
+
+
+### Bug Fixes
+
+* **session:** resubscribing brokers fixed. ([76284e9](https://github.com/ef-ctx/ngAutobahn/commit/76284e9))
+
+
+
 <a name="0.0.15"></a>
 ## [0.0.15](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.14...v0.0.15) (2015-12-23)
 
