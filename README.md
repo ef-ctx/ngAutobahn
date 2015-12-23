@@ -1,6 +1,7 @@
 # ngAutobahn
 [![Build Status: Linux](http://img.shields.io/travis/ef-ctx/ngAutobahn/master.svg?style=flat-square)](https://travis-ci.org/ef-ctx/ngAutobahn)
 [![Bower version](http://img.shields.io/bower/v/ngAutobahn.svg?style=flat-square)](git@github.com:ef-ctx/ngAutobahn.git)
+
 angular modules for autobahn real time services over WAMP web socket protocol.
 
 > ###DESCRIPTION###
@@ -10,11 +11,11 @@ Provides a simple and easy way to interact with real time services using WAMP pr
 * **Restore the connection.** keeping subscribtions intact and resubscribing when regaining connection. Connection could be lost in 2 main cases:
 
   * Losing Socket connection due to a failure only in the socket layer:
-    * Autobahn already provides this feature.
+    * Autobahn already provides this feature, but ngAutobahn preserves all the brokers with the handlers subscribed to them.
 
   * Losing Socket connection due to loss of Internet connection:
     * Chrome has an issue dropping socket connections when network connection dies. [Issue](https://code.google.com/p/chromium/issues/detail?id=76358)
-      In this case we came up with a [Ping service](https://github.com/ef-ctx/ngAutobahn/tree/master/src/lib/ngAutobahn/utils/ping)
+      In this case we came up with a [Ping service](https://github.com/ef-ctx/ngAutobahn/tree/master/src/utils/ping)
       which allow a promise returning function to be called repeatedly
       and if the promise is not resolved after a certain amount of time we disconnect and try to establish a new connection,
       using ping is not enabled by default but it is there to use in the case of need.
@@ -54,6 +55,9 @@ Provides a simple and easy way to interact with real time services using WAMP pr
     }
 
     sessionBroker.subscribe('myMessage', myHandler);
+
+    // to unsbscribe the broker:
+    ngAutobahnSession.unsubscribeBroker(sessionBroker)
     ```
 
   * **Publish Message.**
@@ -100,12 +104,13 @@ Provides a simple and easy way to interact with real time services using WAMP pr
 
 ### It is formed by 3 main modules:
 
-* [ngAutobahn.connection](https://github.com/ef-ctx/ngAutobahn/tree/master/src/lib/ngAutobahn/connection)
-* [ngAutobahn.session](https://github.com/ef-ctx/ngAutobahn/tree/master/src/lib/ngAutobahn/session)
-* [ngAutobahn.messageBroker](https://github.com/ef-ctx/ngAutobahn/tree/master/src/lib/ngAutobahn/messageBroker)
+* [ngAutobahn.connection](https://github.com/ef-ctx/ngAutobahn/tree/master/src/connection)
+* [ngAutobahn.session](https://github.com/ef-ctx/ngAutobahn/tree/master/src/session)
+* [ngAutobahn.messageBroker](https://github.com/ef-ctx/ngAutobahn/tree/master/src/messageBroker)
 
-### And a helper module
-* [ngAutobahn.utils.ping](https://github.com/ef-ctx/ngAutobahn/tree/master/src/lib/ngAutobahn/utils/ping)
+### And a two helper modules
+* [ngAutobahn.utils.ping](https://github.com/ef-ctx/ngAutobahn/tree/master/src/utils/ping)
+* [ngAutobahn.utils.connectionPing](https://github.com/ef-ctx/ngAutobahn/tree/master/src/utils/connectionPing)
 
 ## Getting Started
 
@@ -143,10 +148,6 @@ $ npm install
 $ bower install
 $ grunt
 ```
-
-At this point, the source examples included were built into the `build/` directory and a simple webserver is launched so
-that you can browse the documentation, the examples and the code coverage.
-
 
 ## [MIT License](LICENSE)
 
