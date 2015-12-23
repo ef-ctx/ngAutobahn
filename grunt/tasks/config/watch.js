@@ -13,7 +13,7 @@ module.exports = {
         files: [
             '<%= files.lib %>'
         ],
-        tasks: ['jshint:src', 'karma:unit', 'concat']
+        tasks: ['jshint:src', 'karma:unit', 'concat', 'uglify']
     },
 
     test: {
