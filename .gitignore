@@ -13,6 +13,9 @@ Icon
 npm-debug.log
 .sass-cache
 
+# coverage
+coverage
+
 # dependencies
 /node_modules/
 /vendor/
