@@ -53,6 +53,9 @@
                         this.stop = stop;
 
                         function start() {
+                            if(_interval){
+                                _clearInterval();
+                            }
                             _interval = $interval(_intervalHandler, config.maxResponseDelay, 0, false);
                         }
 
@@ -85,6 +88,7 @@
 
                         function _clearInterval() {
                             $interval.cancel(_interval);
+                            _interval = null;
                         }
                     }
                 }
