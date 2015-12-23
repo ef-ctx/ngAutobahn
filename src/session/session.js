@@ -89,7 +89,6 @@
                     return (_session) ? invokeRemoteCall() : _openSession().then(invokeRemoteCall);
 
                     function invokeRemoteCall() {
-                        console.log('INVOKE REMOTE CALL', methodName, _session.isOpen);
                         return (_session.isOpen) ? _session.call(methodName, [], payload || {}): $q.reject('session is not open');
                     }
 
