@@ -1,3 +1,18 @@
+<a name="0.0.9"></a>
+## [0.0.9](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.8...v0.0.9) (2015-12-23)
+
+
+### Bug Fixes
+
+* **session:** broker subscription fixed. ([8b77c72](https://github.com/ef-ctx/ngAutobahn/commit/8b77c72))
+* **session:** Reject the promise when invoking remoteCall and the session exists but it is not ([e5f05c9](https://github.com/ef-ctx/ngAutobahn/commit/e5f05c9))
+
+### Features
+
+* **diagrams:** Gliffy diagrams added for session. WIP ([3fb4308](https://github.com/ef-ctx/ngAutobahn/commit/3fb4308))
+
+
+
 <a name="v0.0.8"></a>
 ### v0.0.8 (2015-12-15)
 
