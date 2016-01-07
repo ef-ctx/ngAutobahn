@@ -66,7 +66,7 @@
                     if (_session) {
                         resolveBroker();
                     } else {
-                        _openSession().then(resolveBroker, handleError);
+                        _openSession().then(resolveBroker, onOpenConnectionError);
                     }
 
                     return defer.promise;
@@ -75,8 +75,9 @@
                         defer.resolve(_createBroker(channel));
                     }
 
-                    function handleError(error) {
+                    function onOpenConnectionError(error) {
                         defer.reject('ngAutobahnSession.subscribe Error: ', error);
+                        _cleanSession();
                     }
                 }
 
