@@ -1,3 +1,14 @@
+<a name="0.0.19"></a>
+## [0.0.19](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.18...v0.0.19) (2016-01-07)
+
+
+### Bug Fixes
+
+* **CxSocketConnection:** check that session is present when reusing session in openConnection ([e2ddb6c](https://github.com/ef-ctx/ngAutobahn/commit/e2ddb6c))
+* **NgAutobahnSession:** clearSession onOpenConnectionError ([3200cd5](https://github.com/ef-ctx/ngAutobahn/commit/3200cd5))
+
+
+
 <a name="0.0.18"></a>
 ## [0.0.18](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.17...v0.0.18) (2016-01-07)
 
