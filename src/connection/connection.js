@@ -153,7 +153,7 @@
                         function openConnection() {
                             var defer = $q.defer();
 
-                            if (_connection) {
+                            if (_connection && _session) {
                                 defer.resolve(_session);
                                 _connectionOpenedHandler();
                             } else {
