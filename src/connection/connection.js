@@ -165,16 +165,22 @@
 
                             return defer.promise;
 
-                            function onOpen(session) {
-                                _session = session;
-                                defer.resolve(session);
-                                _connectionOpenedHandler();
+                            function onCloseAndNotify() {
+                                _connection.onclose = null;
+                                _connectionLostHandler();
                             }
 
                             function onErrorOpening() {
                                 _connection.onclose = null;
                                 defer.reject();
-                                _connectionLostHandler();
+                            }
+
+                            function onOpen(session) {
+                                _session = session;
+                                defer.resolve(session);
+
+                                _connectionOpenedHandler();
+                                _connection.onclose = onCloseAndNotify;
                             }
                         }
 

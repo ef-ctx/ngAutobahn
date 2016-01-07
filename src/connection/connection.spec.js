@@ -41,10 +41,26 @@ describe('ngAutobahn.connection', function () {
             autobahn = (function () {
                 var self = this,
                     _isConnected = true,
-                    _restablishAfterClose = false;
+                    _restablishAfterClose = false,
+                    _currentConnection;
 
                 // -- CONNECTION -------------------------------
-                function Connection() {}
+                function Connection() {
+                    var self = this;
+
+                    _currentConnection = this;
+
+                    self._ext_onclose = function () {};
+
+                    Object.defineProperty(this, 'onclose', {
+                        get: function () {
+                            return self._onclose;
+                        },
+                        set: function (value) {
+                            self._ext_onclose = value;
+                        }
+                    });
+                }
 
                 Connection.prototype.close = function () {
                     var self = this;
@@ -52,8 +68,15 @@ describe('ngAutobahn.connection', function () {
                         if (_restablishAfterClose) {
                             _isConnected = true;
                         }
+
                         self.onclose();
                     });
+                };
+
+                Connection.prototype._onclose = function () {
+                    if (this._ext_onclose) {
+                        this._ext_onclose();
+                    }
                 };
 
                 Connection.prototype.open = function () {
@@ -67,6 +90,7 @@ describe('ngAutobahn.connection', function () {
                         }
                     });
                 };
+
 
                 // -- SESSION ---------------------------------
                 function Session() {}
@@ -100,6 +124,8 @@ describe('ngAutobahn.connection', function () {
                     if (once) {
                         _restablishAfterClose = true;
                     }
+
+                    _currentConnection.close();
                     _isConnected = false;
                 }
 
@@ -114,6 +140,7 @@ describe('ngAutobahn.connection', function () {
             window.autobahn = autobahn;
             spyOn(autobahn.Connection.prototype, 'open').and.callThrough();
             spyOn(autobahn.Connection.prototype, 'close').and.callThrough();
+            spyOn(autobahn.Connection.prototype, '_onclose').and.callThrough();
             spyOn(autobahn.Session.prototype, 'call').and.callThrough();
         });
 
@@ -146,17 +173,39 @@ describe('ngAutobahn.connection', function () {
 
             describe('establishing connection', function () {
 
-                it('should resolve the promise when the connection is stablished', function () {
+                it('should resolve the promise when the connection is established', function () {
                     socketConnection.openConnection().then(promiseHandlers.success);
                     $timeout.flush();
                     expect(promiseHandlers.success).toHaveBeenCalled();
+                });
+
+                it('should notify about connection lost after a connection is established and the is lost', function () {
+                    var foo = {
+                        bar: function () {}
+                    };
+                    spyOn(foo, 'bar');
+
+                    $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, foo.bar);
+
+                    socketConnection.openConnection().then(promiseHandlers.success);
+                    $timeout.flush();
+
+                    expect(promiseHandlers.success).toHaveBeenCalled();
+
+                    autobahn.dropConnection();
+                    $timeout.flush();
+
+                    expect(autobahn.Connection.prototype._onclose).toHaveBeenCalled();
+                    expect(foo.bar).toHaveBeenCalled();
                 });
 
                 it('should reject the promise when the connection can NOT be stablished', function () {
                     socketConnection.openConnection().then(promiseHandlers.success, promiseHandlers.error);
                     autobahn.dropConnection();
                     $timeout.flush();
+
                     expect(promiseHandlers.error).toHaveBeenCalled();
+                    expect(autobahn.Connection.prototype._onclose).toHaveBeenCalled();
                 });
 
                 it('should resolve the same instance of _session when calling openConnection twice', function () {
