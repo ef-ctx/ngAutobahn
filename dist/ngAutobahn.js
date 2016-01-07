@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.17
+ * ngAutobahn - v0.0.18
  * 
- * Release date : 2015-12-23 : 18:39
+ * Release date : 2016-01-07 : 11:34
  * Author       : Jaime Beneytez - EF CTX 
  * License      : MIT 
  * 
@@ -177,16 +177,22 @@
 
                             return defer.promise;
 
-                            function onOpen(session) {
-                                _session = session;
-                                defer.resolve(session);
-                                _connectionOpenedHandler();
+                            function onCloseAndNotify() {
+                                _connection.onclose = null;
+                                _connectionLostHandler();
                             }
 
                             function onErrorOpening() {
                                 _connection.onclose = null;
                                 defer.reject();
-                                _connectionLostHandler();
+                            }
+
+                            function onOpen(session) {
+                                _session = session;
+                                defer.resolve(session);
+
+                                _connectionOpenedHandler();
+                                _connection.onclose = onCloseAndNotify;
                             }
                         }
 
@@ -747,7 +753,7 @@
                             $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, _ping.stop);
                             $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, _ping.stop);
 
-                            if (ngAutobahnConnection.isOpened) {
+                            if (ngAutobahnConnection.isOpen) {
                                 _ping.start();
                             }
                         };

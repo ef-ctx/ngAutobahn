@@ -1,3 +1,14 @@
+<a name="0.0.18"></a>
+## [0.0.18](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.17...v0.0.18) (2016-01-07)
+
+
+### Bug Fixes
+
+* **CxSocketConnection:** notify about lost conenction on success ([9e4cb14](https://github.com/ef-ctx/ngAutobahn/commit/9e4cb14))
+* **NgAutobahnConnectionPing:** typo on isOpen ([cc70e62](https://github.com/ef-ctx/ngAutobahn/commit/cc70e62))
+
+
+
 <a name="0.0.17"></a>
 ## [0.0.17](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.16...v0.0.17) (2015-12-23)
 
