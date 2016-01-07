@@ -68,7 +68,7 @@
                             $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, _ping.stop);
                             $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, _ping.stop);
 
-                            if (ngAutobahnConnection.isOpened) {
+                            if (ngAutobahnConnection.isOpen) {
                                 _ping.start();
                             }
                         };
