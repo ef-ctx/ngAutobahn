@@ -1,3 +1,13 @@
+<a name="0.0.20"></a>
+## [0.0.20](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.19...v0.0.20) (2016-02-12)
+
+
+### Features
+
+* **Ping:** configuration ([46c46f0](https://github.com/ef-ctx/ngAutobahn/commit/46c46f0))
+
+
+
 <a name="0.0.19"></a>
 ## [0.0.19](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.18...v0.0.19) (2016-01-07)
 

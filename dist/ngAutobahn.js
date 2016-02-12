@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.19
+ * ngAutobahn - v0.0.20
  * 
- * Release date : 2016-01-07 : 13:57
+ * Release date : 2016-02-12 : 16:05
  * Author       : Jaime Beneytez - EF CTX 
  * License      : MIT 
  * 
@@ -684,7 +684,7 @@
 
 })(angular);
 
-(function (angular) {
+(function(angular) {
     'use strict';
 
     /**********************************************************
@@ -699,7 +699,10 @@
     angular.module('ngAutobahn.utils.connectionPing', [
         'ngAutobahn',
         'ngAutobahn.utils.ping'
-    ])
+    ]).provider('ngAutobahnConnectionPing', [
+        'NgAutobahnPingProvider',
+        $ngAutobahnConnectionPingProvider
+    ]);
 
     /**********************************************************
      *
@@ -709,77 +712,78 @@
      *
      **********************************************************/
 
-    .provider('ngAutobahnConnectionPing', [
-        'NgAutobahnPingProvider',
-        function (NgAutobahnPingProvider) {
-            var self = this,
-                configuration = {
-                    pingMessage: 'ping',
-                    delay: 1500,
-                    maxResponseDelay: 3000
-                };
 
-            NgAutobahnPingProvider.configure({
-                delay: configuration.delay,
-                maxResponseDelay: configuration.maxResponseDelay
-            });
-
-            self.configure = function configure(config) {
-                angular.extend(configuration, config);
-                return configuration;
+    function $ngAutobahnConnectionPingProvider(NgAutobahnPingProvider) {
+        var self = this,
+            configuration = {
+                pingMessage: 'ping',
+                intervalMs: 3000
             };
 
-            self.$get = [
-                '$rootScope',
-                'ngAutobahnConnection',
-                'ngAutobahnSession',
-                'NgAutobahnPing',
-                'NG_AUTOBAHN_CONNECTION_EVENTS',
-                function (
-                    $rootScope,
-                    ngAutobahnConnection,
-                    ngAutobahnSession,
-                    NgAutobahnPing,
-                    NG_AUTOBAHN_CONNECTION_EVENTS
-                ) {
+        this.configure = configure;
 
-                    return new NgAutobahnConnectionPing();
+        this.$get = [
+            '$rootScope',
+            'ngAutobahnConnection',
+            'ngAutobahnSession',
+            'NgAutobahnPing',
+            'NG_AUTOBAHN_CONNECTION_EVENTS',
+            $get
+        ];
 
-                    function NgAutobahnConnectionPing() {
-                        var self = this,
-                            _ping = new NgAutobahnPing(pingFn, errorFn);
-
-                        self.activate = function () {
-                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _ping.start);
-                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, _ping.stop);
-                            $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, _ping.stop);
-
-                            if (ngAutobahnConnection.isOpen) {
-                                _ping.start();
-                            }
-                        };
-
-                        /****************************************************************
-                         * PING FUNCTIONS
-                         ***************************************************************/
-
-                        function errorFn() {
-                            return ngAutobahnConnection.resetConnection();
-                        }
-
-                        function pingFn() {
-                            return ngAutobahnSession.remoteCall(configuration.pingMessage);
-                        }
-
-                    }
-                }
-            ];
+        function configure(config) {
+            angular.extend(configuration, config);
+            _configurePing(configuration);
+            return configuration;
         }
-    ]);
+
+        function _configurePing(config) {
+            NgAutobahnPingProvider.configure(config);
+        }
+
+        function $get(
+            $rootScope,
+            ngAutobahnConnection,
+            ngAutobahnSession,
+            NgAutobahnPing,
+            NG_AUTOBAHN_CONNECTION_EVENTS
+        ) {
+
+            return new NgAutobahnConnectionPing();
+
+            function NgAutobahnConnectionPing() {
+                var self = this,
+                    _ping = new NgAutobahnPing(pingFn, errorFn);
+
+                self.activate = function() {
+                    $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _ping.start);
+                    $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, _ping.stop);
+                    $rootScope.$on(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, _ping.stop);
+
+                    if (ngAutobahnConnection.isOpened) {
+                        _ping.start();
+                    }
+                };
+
+                /****************************************************************
+                 * PING FUNCTIONS
+                 ***************************************************************/
+
+                function errorFn() {
+                    return ngAutobahnConnection.resetConnection();
+                }
+
+                function pingFn() {
+                    return ngAutobahnSession.remoteCall(configuration.pingMessage);
+                }
+
+            }
+        }
+    }
 
 })(angular);
 
-(function (angular) {
+(function(angular) {
     'use strict';
 
     /*****************************************************************************
@@ -792,6 +796,9 @@
      *****************************************************************************/
 
     angular.module('ngAutobahn.utils.ping', [])
+        .provider('NgAutobahnPing', [
+            $NgAutobahnPingProvider
+        ]);
 
     /*****************************************************************************
      *
@@ -805,77 +812,77 @@
      *
      *****************************************************************************/
 
-    .provider('NgAutobahnPing', [
+    function $NgAutobahnPingProvider() {
 
-        function () {
-
-            var self = this,
-                config = {
-                    delay: 1500,
-                    maxResponseDelay: 3000
-                };
-
-            self.configure = function (configuration) {
-                angular.extend(config, configuration);
+        var self = this,
+            config = {
+                intervalMs: 3000
             };
 
-            self.$get = [
-                '$timeout',
-                '$interval',
-                function NgAutobahnPingFactory($timeout, $interval) {
+        this.configure = configure;
 
-                    return NgAutobahnPing;
+        this.$get = [
+            '$timeout',
+            '$interval',
+            $NgAutobahnPingFactory
+        ];
 
-                    function NgAutobahnPing(pingFn, errorFn) {
-                        var _isPingPromiseResolved = true,
-                            _interval;
+        function configure(configuration) {
+            angular.extend(config, configuration);
+        }
 
-                        this.start = start;
-                        this.stop = stop;
+        function $NgAutobahnPingFactory($timeout, $interval) {
 
-                        function start() {
-                            if(_interval){
-                                _clearInterval();
-                            }
-                            _interval = $interval(_intervalHandler, config.maxResponseDelay, 0, false);
-                        }
+            return NgAutobahnPing;
 
-                        function _intervalHandler() {
-                            if (_isPingPromiseResolved) {
-                                _invokePingFn();
-                            } else {
-                                _clearInterval();
-                                _invokeErrorFn();
-                            }
-                        }
+            function NgAutobahnPing(pingFn, errorFn) {
+                var _isPingPromiseResolved = true,
+                    _interval;
 
-                        function stop() {
-                            _clearInterval();
-                            _isPingPromiseResolved = true;
-                        }
+                this.start = start;
+                this.stop = stop;
 
-                        function _invokePingFn() {
-                            _isPingPromiseResolved = false;
-                            pingFn().then(_pingFunctionResolvedHandler);
-                        }
+                function start() {
+                    if (_interval) {
+                        _clearInterval();
+                    }
+                    _interval = $interval(_intervalHandler, config.intervalMs, 0, false);
+                }
 
-                        function _invokeErrorFn() {
-                            errorFn();
-                        }
-
-                        function _pingFunctionResolvedHandler() {
-                            _isPingPromiseResolved = true;
-                        }
-
-                        function _clearInterval() {
-                            $interval.cancel(_interval);
-                            _interval = null;
-                        }
+                function _intervalHandler() {
+                    if (_isPingPromiseResolved) {
+                        _invokePingFn();
+                    } else {
+                        _clearInterval();
+                        _invokeErrorFn();
                     }
                 }
-            ];
+
+                function stop() {
+                    _clearInterval();
+                    _isPingPromiseResolved = true;
+                }
+
+                function _invokePingFn() {
+                    _isPingPromiseResolved = false;
+                    pingFn().then(_pingFunctionResolvedHandler);
+                }
+
+                function _invokeErrorFn() {
+                    errorFn();
+                }
+
+                function _pingFunctionResolvedHandler() {
+                    _isPingPromiseResolved = true;
+                }
+
+                function _clearInterval() {
+                    $interval.cancel(_interval);
+                    _interval = null;
+                }
+            }
         }
-    ]);
+    }
 
     /*****************************************************************************/
 
