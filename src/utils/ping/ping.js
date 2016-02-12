@@ -1,4 +1,4 @@
-(function (angular) {
+(function(angular) {
     'use strict';
 
     /*****************************************************************************
@@ -11,6 +11,9 @@
      *****************************************************************************/
 
     angular.module('ngAutobahn.utils.ping', [])
+        .provider('NgAutobahnPing', [
+            $NgAutobahnPingProvider
+        ]);
 
     /*****************************************************************************
      *
@@ -24,77 +27,77 @@
      *
      *****************************************************************************/
 
-    .provider('NgAutobahnPing', [
+    function $NgAutobahnPingProvider() {
 
-        function () {
-
-            var self = this,
-                config = {
-                    delay: 1500,
-                    maxResponseDelay: 3000
-                };
-
-            self.configure = function (configuration) {
-                angular.extend(config, configuration);
+        var self = this,
+            config = {
+                intervalMs: 3000
             };
 
-            self.$get = [
-                '$timeout',
-                '$interval',
-                function NgAutobahnPingFactory($timeout, $interval) {
+        this.configure = configure;
 
-                    return NgAutobahnPing;
+        this.$get = [
+            '$timeout',
+            '$interval',
+            $NgAutobahnPingFactory
+        ];
 
-                    function NgAutobahnPing(pingFn, errorFn) {
-                        var _isPingPromiseResolved = true,
-                            _interval;
+        function configure(configuration) {
+            angular.extend(config, configuration);
+        }
 
-                        this.start = start;
-                        this.stop = stop;
+        function $NgAutobahnPingFactory($timeout, $interval) {
 
-                        function start() {
-                            if(_interval){
-                                _clearInterval();
-                            }
-                            _interval = $interval(_intervalHandler, config.maxResponseDelay, 0, false);
-                        }
+            return NgAutobahnPing;
 
-                        function _intervalHandler() {
-                            if (_isPingPromiseResolved) {
-                                _invokePingFn();
-                            } else {
-                                _clearInterval();
-                                _invokeErrorFn();
-                            }
-                        }
+            function NgAutobahnPing(pingFn, errorFn) {
+                var _isPingPromiseResolved = true,
+                    _interval;
 
-                        function stop() {
-                            _clearInterval();
-                            _isPingPromiseResolved = true;
-                        }
+                this.start = start;
+                this.stop = stop;
 
-                        function _invokePingFn() {
-                            _isPingPromiseResolved = false;
-                            pingFn().then(_pingFunctionResolvedHandler);
-                        }
+                function start() {
+                    if (_interval) {
+                        _clearInterval();
+                    }
+                    _interval = $interval(_intervalHandler, config.intervalMs, 0, false);
+                }
 
-                        function _invokeErrorFn() {
-                            errorFn();
-                        }
-
-                        function _pingFunctionResolvedHandler() {
-                            _isPingPromiseResolved = true;
-                        }
-
-                        function _clearInterval() {
-                            $interval.cancel(_interval);
-                            _interval = null;
-                        }
+                function _intervalHandler() {
+                    if (_isPingPromiseResolved) {
+                        _invokePingFn();
+                    } else {
+                        _clearInterval();
+                        _invokeErrorFn();
                     }
                 }
-            ];
+
+                function stop() {
+                    _clearInterval();
+                    _isPingPromiseResolved = true;
+                }
+
+                function _invokePingFn() {
+                    _isPingPromiseResolved = false;
+                    pingFn().then(_pingFunctionResolvedHandler);
+                }
+
+                function _invokeErrorFn() {
+                    errorFn();
+                }
+
+                function _pingFunctionResolvedHandler() {
+                    _isPingPromiseResolved = true;
+                }
+
+                function _clearInterval() {
+                    $interval.cancel(_interval);
+                    _interval = null;
+                }
+            }
         }
-    ]);
+    }
 
     /*****************************************************************************/
 
