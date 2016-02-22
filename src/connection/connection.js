@@ -165,9 +165,9 @@
 
                             return defer.promise;
 
-                            function onCloseAndNotify() {
+                            function onCloseAndNotify(type, reason) {
                                 _connection.onclose = null;
-                                _connectionLostHandler();
+                                _connectionLostHandler(reason);
                             }
 
                             function onErrorOpening() {
@@ -229,9 +229,9 @@
                          * HANDLERS
                          ***************************************************************/
 
-                        function _connectionLostHandler() {
+                        function _connectionLostHandler(reason) {
                             _status = NG_AUTOBAHN_CONNECTION_STATUS.LOST;
-                            notifyConnectionIsLost();
+                            notifyConnectionIsLost(reason);
                         }
 
                         function _connectionClosedHandler() {
