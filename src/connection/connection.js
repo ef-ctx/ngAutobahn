@@ -165,9 +165,9 @@
 
                             return defer.promise;
 
-                            function onCloseAndNotify(type, reason) {
+                            function onCloseAndNotify(type, details) {
                                 _connection.onclose = null;
-                                _connectionLostHandler(reason);
+                                _connectionLostHandler(details);
                             }
 
                             function onErrorOpening() {
@@ -177,9 +177,9 @@
 
                             function onOpen(session) {
                                 _session = session;
-                                defer.resolve(session);
+                                defer.resolve(_session);
 
-                                _connectionOpenedHandler();
+                                _connectionOpenedHandler(_session);
                                 _connection.onclose = onCloseAndNotify;
                             }
                         }
@@ -206,10 +206,10 @@
 
                             return defer.promise;
 
-                            function connectionCloseHandler(reason) {
+                            function connectionCloseHandler(type, details) {
                                 _connection.onclose = null;
                                 _connection = null;
-                                defer.resolve();
+                                defer.resolve(details);
                             }
                         }
 
@@ -229,35 +229,41 @@
                          * HANDLERS
                          ***************************************************************/
 
-                        function _connectionLostHandler(reason) {
-                            _status = NG_AUTOBAHN_CONNECTION_STATUS.LOST;
-                            notifyConnectionIsLost(reason);
+                        function _connectionOpenedHandler(details) {
+
+                            _changeStatus(
+                                NG_AUTOBAHN_CONNECTION_STATUS.OPENED,
+                                details,
+                                NG_AUTOBAHN_CONNECTION_EVENTS.OPEN
+                            );
                         }
 
-                        function _connectionClosedHandler() {
-                            _status = NG_AUTOBAHN_CONNECTION_STATUS.CLOSED;
-                            notifyConnectionIsClosed();
+                        function _connectionClosedHandler(details) {
+
+                            _changeStatus(
+                                NG_AUTOBAHN_CONNECTION_STATUS.CLOSED,
+                                details,
+                                NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE
+                            );
                         }
 
-                        function _connectionOpenedHandler() {
-                            _status = NG_AUTOBAHN_CONNECTION_STATUS.OPENED;
-                            notifyConnectionIsOpened();
+                        function _connectionLostHandler(details) {
+
+                            _changeStatus(
+                                NG_AUTOBAHN_CONNECTION_STATUS.LOST,
+                                details,
+                                NG_AUTOBAHN_CONNECTION_EVENTS.LOST
+                            );
                         }
 
                         /****************************************************************
                          * NOTIFIERS
                          ***************************************************************/
 
-                        function notifyConnectionIsOpened() {
-                            $rootScope.$broadcast(NG_AUTOBAHN_CONNECTION_EVENTS.OPEN, _session);
-                        }
-
-                        function notifyConnectionIsClosed(reason) {
-                            $rootScope.$broadcast(NG_AUTOBAHN_CONNECTION_EVENTS.CLOSE, reason);
-                        }
-
-                        function notifyConnectionIsLost(reason) {
-                            $rootScope.$broadcast(NG_AUTOBAHN_CONNECTION_EVENTS.LOST, reason);
+                        function _changeStatus(status, details, eventType) {
+                            var previousStatus = _status;
+                            _status = status;
+                            $rootScope.$broadcast(eventType, details, previousStatus);
                         }
                     }
                 }
