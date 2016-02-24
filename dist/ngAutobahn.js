@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.20
+ * ngAutobahn - v0.0.21
  * 
- * Release date : 2016-02-12 : 16:05
+ * Release date : 2016-02-24 : 14:09
  * Author       : Jaime Beneytez - EF CTX 
  * License      : MIT 
  * 
@@ -177,9 +177,9 @@
 
                             return defer.promise;
 
-                            function onCloseAndNotify() {
+                            function onCloseAndNotify(type, reason) {
                                 _connection.onclose = null;
-                                _connectionLostHandler();
+                                _connectionLostHandler(reason);
                             }
 
                             function onErrorOpening() {
@@ -241,9 +241,9 @@
                          * HANDLERS
                          ***************************************************************/
 
-                        function _connectionLostHandler() {
+                        function _connectionLostHandler(reason) {
                             _status = NG_AUTOBAHN_CONNECTION_STATUS.LOST;
-                            notifyConnectionIsLost();
+                            notifyConnectionIsLost(reason);
                         }
 
                         function _connectionClosedHandler() {
