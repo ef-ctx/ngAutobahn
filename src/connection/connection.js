@@ -167,6 +167,7 @@
 
                             function onCloseAndNotify(type, details) {
                                 _connection.onclose = null;
+                                _connection = null;
                                 _connectionLostHandler(details);
                             }
 
@@ -219,7 +220,7 @@
 
                         function resetConnection() {
 
-                            _connectionLostHandler();
+                            _connectionLostHandler({reason:'connection.reset'});
 
                             _closeConnection()
                                 .then(openConnection);
