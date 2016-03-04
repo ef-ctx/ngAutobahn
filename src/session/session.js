@@ -137,7 +137,7 @@
                 }
 
                 function connectionClosedHandler(evt, reason) {
-                    _unsubscribeAllBrokers();
+                    _cleanAllBrokers();
                     _cleanSession();
                 }
 
