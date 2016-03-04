@@ -46,7 +46,7 @@ module.exports = {
         singleRun: true,
 
         browsers: [
-            'PhantomJS',
+            'PhantomJS'
         ]
     }
 
