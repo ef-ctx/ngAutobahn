@@ -1,6 +1,6 @@
 {
     "name": "ngAutobahn",
-    "version": "0.0.22",
+    "version": "0.0.23",
     "description": "angular modules for autobahn real time services over WAMP web socket protocol ",
     "authors": [
         "EF CTX <ctx@ef.com> (http://efclass.io)"

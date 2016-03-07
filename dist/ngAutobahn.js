@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.22
+ * ngAutobahn - v0.0.23
  * 
- * Release date : 2016-02-24 : 14:10
+ * Release date : 2016-03-07 : 11:25
  * Author       : Jaime Beneytez - EF CTX 
  * License      : MIT 
  * 
@@ -179,7 +179,14 @@
 
                             function onCloseAndNotify(type, details) {
                                 _connection.onclose = null;
-                                _connectionLostHandler(details);
+
+                                if(type === 'lost') {
+                                    _connectionLostHandler(details);
+                                    return;
+                                }
+
+                                _connection = null;
+                                _connectionClosedHandler(details);
                             }
 
                             function onErrorOpening() {
@@ -231,7 +238,7 @@
 
                         function resetConnection() {
 
-                            _connectionLostHandler();
+                            _connectionLostHandler({reason:'connection.reset'});
 
                             _closeConnection()
                                 .then(openConnection);
@@ -549,7 +556,7 @@
                 }
 
                 function connectionClosedHandler(evt, reason) {
-                    _unsubscribeAllBrokers();
+                    _cleanAllBrokers();
                     _cleanSession();
                 }
 

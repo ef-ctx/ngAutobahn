@@ -1,3 +1,15 @@
+<a name="0.0.23"></a>
+## [0.0.23](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.22...v0.0.23) (2016-03-07)
+
+
+### Bug Fixes
+
+* equality fail ([9f393af](https://github.com/ef-ctx/ngAutobahn/commit/9f393af))
+* failing tests ([3d3c985](https://github.com/ef-ctx/ngAutobahn/commit/3d3c985))
+* implemented close handler logic to deal with close and lost ([5e20036](https://github.com/ef-ctx/ngAutobahn/commit/5e20036))
+
+
+
 <a name="0.0.22"></a>
 ## [0.0.22](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.20...v0.0.22) (2016-02-24)
 
