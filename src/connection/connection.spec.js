@@ -75,7 +75,7 @@ describe('ngAutobahn.connection', function () {
 
                 Connection.prototype._onclose = function () {
                     if (this._ext_onclose) {
-                        this._ext_onclose();
+                        this._ext_onclose('lost');
                     }
                 };
 
@@ -179,7 +179,7 @@ describe('ngAutobahn.connection', function () {
                     expect(promiseHandlers.success).toHaveBeenCalled();
                 });
 
-                it('should notify about connection lost after a connection is established and the is lost', function () {
+                it('should notify about connection lost after a connection is established and is then lost', function () {
                     var foo = {
                         bar: function () {}
                     };

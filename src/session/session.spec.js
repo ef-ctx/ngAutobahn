@@ -99,6 +99,10 @@ describe('ngAutobahnSession', function () {
         $rootScope.$broadcast(connectionEvents.CLOSE, reason);
     }
 
+    function notifyConnectionIsLost(reason) {
+        $rootScope.$broadcast(connectionEvents.LOST, reason);
+    }
+
     beforeEach(module('ngAutobahn.session'));
 
     beforeEach(function () {
@@ -149,10 +153,21 @@ describe('ngAutobahnSession', function () {
             return defer.promise;
         };
 
+        ngAutobahnConnection.loseConnection = function () {
+            var defer = $q.defer();
+
+            $timeout(function () {
+                notifyConnectionIsLost();
+                defer.resolve();
+            });
+
+            return defer.promise;
+        };
+
         ngAutobahnConnection.closeAndRestablishConnection = function () {
             $timeout(function () {
                 channelHandlers = {};
-                notifyConnectionIsClosed();
+                notifyConnectionIsLost();
                 $timeout(function () {
                     notifyConnectionIsOpened(autobahn.session);
                 });
@@ -344,7 +359,7 @@ describe('ngAutobahnSession', function () {
                 receiveMessageInChannel(_subscription_1.channel, _subscription_1.message.name, _subscription_1.message.data);
                 expect(handlers.messageReceived.calls.argsFor(0)[0]).toBe(_subscription_1.message.data);
 
-                ngAutobahnConnection.closeConnection();
+                ngAutobahnConnection.loseConnection();
                 isConnected = false;
 
                 ngAutobahnSession.subscribe(_subscription_2.channel).then(function (broker) {
