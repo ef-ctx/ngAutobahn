@@ -168,7 +168,7 @@
                             function onCloseAndNotify(type, details) {
                                 _connection.onclose = null;
 
-                                if(type == 'lost') {
+                                if(type === 'lost') {
                                     _connectionLostHandler(details);
                                     return;
                                 }
