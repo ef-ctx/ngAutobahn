@@ -234,23 +234,6 @@ describe('ngAutobahnSession', function () {
                         expect(typeof _broker.publish).toBe('function');
                     }));
                 });
-
-                describe('AND the connection could NOT be established', function () {
-                    it('SHOULD also return the broker', inject(function (ngAutobahnSession) {
-                        var _broker,
-                            _channel = 'foo';
-                        ngAutobahnSession.subscribe(_channel).then(function (broker) {
-                            _broker = broker;
-                        });
-                        isConnected = true;
-                        $timeout.flush();
-
-                        expect(_broker.getChannel()).toEqual(_channel);
-                        expect(typeof _broker.subscribe).toBe('function');
-                        expect(typeof _broker.publish).toBe('function');
-                    }));
-                });
-
             });
         });
 
