@@ -1,3 +1,13 @@
+<a name="0.0.24"></a>
+## [0.0.24](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.23...v0.0.24) (2016-04-12)
+
+
+### Bug Fixes
+
+* **ngautobahnSession:** Return promise always when subscribing. ([f83215b](https://github.com/ef-ctx/ngAutobahn/commit/f83215b))
+
+
+
 <a name="0.0.23"></a>
 ## [0.0.23](https://github.com/ef-ctx/ngAutobahn/compare/v0.0.22...v0.0.23) (2016-03-07)
 

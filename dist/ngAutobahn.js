@@ -1,8 +1,8 @@
 /**********************************************************
  * 
- * ngAutobahn - v0.0.23
+ * ngAutobahn - v0.0.24
  * 
- * Release date : 2016-03-07 : 11:25
+ * Release date : 2016-04-12 : 15:02
  * Author       : Jaime Beneytez - EF CTX 
  * License      : MIT 
  * 
@@ -476,29 +476,28 @@
                  ***************************************************************/
 
                 function subscribe(channel) {
-                    var defer = $q.defer();
-
                     if (!channel) {
                         throw new Error('ngAutobahn.session.subscribe error: Trying to subscribe without specifying channel');
                     }
 
                     if (_session) {
-                        resolveBroker();
+                        return createBroker();
                     } else {
-                        _openSession().then(resolveBroker, onOpenConnectionError);
+                        return _openSession()
+                            .then(createBroker)
+                            .catch(onOpenConnectionError);
                     }
 
-                    return defer.promise;
-
-                    function resolveBroker() {
-                        defer.resolve(_createBroker(channel));
+                    function createBroker() {
+                        return _createBroker(channel);
                     }
 
                     function onOpenConnectionError(error) {
-                        defer.reject('ngAutobahnSession.subscribe Error: ', error);
+                        $q.reject('ngAutobahnSession.subscribe Error: ', error);
                         _cleanSession();
                     }
                 }
+
 
                 /****************************************************************
                  * REMOTE CALL
@@ -611,17 +610,20 @@
                 // Brokers : @TODO: Build an object to encapsulate this logic
 
                 // create --------------------------------------------------
-
+                //
                 function _createBroker(channel) {
                     var broker = new NgAutobahnMessageBroker(channel, publish);
 
-                    _subscribeBroker(broker)
-                        .then(storeBroker);
+                    return _subscribeBroker(broker)
+                        .then(resolveBrokerFacade)
+                        .finally(storeBroker);
 
-                    return broker.facade;
-
-                    function storeBroker(broker) {
+                    function storeBroker() {
                         _brokers.push(broker);
+                    }
+
+                    function resolveBrokerFacade() {
+                        return broker.facade;
                     }
                 }
 
@@ -695,7 +697,11 @@
 
     /*****************************************************************************/
 
-})(angular);
+}(angular));
+
+
+
+
 
 (function(angular) {
     'use strict';
